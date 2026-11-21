@@ -130,7 +130,7 @@
 
   /* 한 기둥(대운·세운)이 들어올 때: 점수 + 「생길 일」
    * ctx = { wealthB, wealthEl, wealthCnt, gunGeop, strong } */
-  function rate(saju, fav, p, ctx) {
+  function rate(saju, fav, p, ctx, amp) { // amp: 그때 대운도 배우자 자리를 건드리는지
     const dm = saju.dayMaster;
     const sg = GROUP[S.tenGod(dm, p.stem)], bg = GROUP[S.tenGod(dm, HIDDEN[p.branch])];
     const natalB = [saju.year, saju.month, saju.day, saju.hour].filter(Boolean).map((x) => x.branch);
@@ -162,7 +162,7 @@
       else if (sg === '관성') events.push(['🧲', '자리·인연이 니한테 와서 붙는다(합).']);
     }
     if (rel === '충') { s -= 0.75; events.push(['💥', '판이 바뀐다. 이사·이직·창업·정리 같은 큰 움직임이 온다.']); events.push(['💔', '배우자 자리가 흔들린다. 짝과 거리가 생기기 쉬우니 말 한마디 아껴라.']); }
-    if (rel === '원진' || rel === '형') events.push(['💔', '서운함이 쌓이기 쉬운 때다. 가까운 사람한테 먼저 손 내밀어라.']);
+    if ((rel === '원진' || rel === '형' || rel === '자형') && amp) events.push(['💔', '대운에 이미 금이 가 있는데 그해 또 건드린다. 짝과의 사이가 크게 흔들리기 쉬운 해다.']);
     if (rel === '육합' || rel === '삼합') { s += 0.5; events.push(['🤝', '계약·동업·좋은 만남이 붙는다.']); }
     if ((sg === '재성' || bg === '재성') && !locked) events.push(['💰', '돈이 크게 움직인다. 들어오는 만큼 나가는 길도 단디 막아라.']);
     if (sg === '관성' || bg === '관성') events.push(['🏛️', '책임·사람·빚이 무거워진다. 자리는 커지는데 어깨가 아프다.']);
@@ -286,9 +286,14 @@
       const fromYear = d.fromYear;
       return { ...d, ...r, fromYear, toYear: fromYear + 9, current: now >= fromYear && now <= fromYear + 9 };
     });
+    // 그해가 속한 대운이 배우자 자리(일지)와 충·형·원진이면 true
+    const daeunAmp = (yy) => {
+      const d = daeunList.find((x) => yy >= x.fromYear && yy <= x.toYear);
+      return !!d && ['충', '형', '원진', '자형'].includes(S.branchRelation(saju.day.branch, d.pillar.branch));
+    };
     const yearInfo = (yy) => {
       const p = S.pillar(yy - 4);
-      const r = rate(saju, fav, p, ctx);
+      const r = rate(saju, fav, p, ctx, daeunAmp(yy));
       return { year: yy, pillar: p, ...r, text: r.text.replace(/십 년/g, '한 해'), age: yy - birthY + 1,
         spouse: r.stemGroup === spouseGroup || r.branchGroup === spouseGroup, child: r.stemGroup === childGroup || r.branchGroup === childGroup };
     };
