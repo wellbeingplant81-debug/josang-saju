@@ -161,7 +161,8 @@
       if (sg === '재성') { s += 0.5; events.push(['🧲', '돈 글자가 니한테 와서 착 붙는다(합). 벌이가 손에 붙는 때다.']); }
       else if (sg === '관성') events.push(['🧲', '자리·인연이 니한테 와서 붙는다(합).']);
     }
-    if (rel === '충') { s -= 0.75; events.push(['💥', '판이 바뀐다. 이사·이직·창업·정리 같은 큰 움직임이 온다.']); }
+    if (rel === '충') { s -= 0.75; events.push(['💥', '판이 바뀐다. 이사·이직·창업·정리 같은 큰 움직임이 온다.']); events.push(['💔', '배우자 자리가 흔들린다. 짝과 거리가 생기기 쉬우니 말 한마디 아껴라.']); }
+    if (rel === '원진' || rel === '형') events.push(['💔', '서운함이 쌓이기 쉬운 때다. 가까운 사람한테 먼저 손 내밀어라.']);
     if (rel === '육합' || rel === '삼합') { s += 0.5; events.push(['🤝', '계약·동업·좋은 만남이 붙는다.']); }
     if ((sg === '재성' || bg === '재성') && !locked) events.push(['💰', '돈이 크게 움직인다. 들어오는 만큼 나가는 길도 단디 막아라.']);
     if (sg === '관성' || bg === '관성') events.push(['🏛️', '책임·사람·빚이 무거워진다. 자리는 커지는데 어깨가 아프다.']);
@@ -225,20 +226,41 @@
     else love.push(`짝 글자가 알맞게 있다. ${spousePos.where.startsWith('월') ? '일터나 사회생활에서' : spousePos.where.startsWith('년') ? '어릴 적 친구나 고향 인연 중에서' : '가까운 생활 반경에서'} 인연이 닿는다.`);
     if (st.label === '신강' && cnt.비겁 >= 3) love.push('근데 니 고집 때문에 연애할 때도 키를 니가 잡을라 칸다. 상대 말 끝까지 들어 주면 점수가 두 배다, 명심해래이.');
 
+    /* 결혼운: 배우자 자리(일지)와 짝 글자(남=재성, 여=관성)를 같이 보고, 굴곡 신호를 점수로 모은다.
+     * 「화목하다」 같은 단정은 하지 않는다. 이혼·재혼한 사람이 읽어도 상처받지 않게. */
     const marry = [];
-    const palace = GROUP[S.tenGod(saju.dayMaster, HIDDEN[saju.day.branch])];
-    marry.push({
-      비겁: '배우자 자리에 니 닮은 기운이 앉아 있다. 친구 같은 부부가 되는데, 고집 둘이 부딪치면 파도가 친다. 져 주는 쪽이 이기는 기다.',
-      식상: '배우자 자리에 재주 기운이 앉았다. 같이 있으면 웃음이 끊이질 않는 집이 된다.',
-      재성: '배우자 자리에 돈 기운이 앉았다. 살림 야무지게 하는 짝을 만나 곳간이 차는 집이다.',
-      관성: '배우자 자리에 명예 기운이 앉았다. 반듯하고 책임감 있는 짝이다. 서로 체면 세워 주는 집안이 된다.',
-      인성: '배우자 자리에 도움 기운이 앉았다. 니를 챙기고 받쳐 주는 짝이니, 고맙다는 말 아끼지 마래이.',
-    }[palace]);
+    const dm = saju.dayMaster;
+    const palaceGod = S.tenGod(dm, HIDDEN[saju.day.branch]);
+    const palace = GROUP[palaceGod];
+    const gods = pos.map((p) => p.god); // 천간 + 지장간 본기 (일간 제외)
+    const has = (g) => gods.includes(g);
     const relsDay = [saju.year, saju.month, saju.hour].filter(Boolean).map((p) => S.branchRelation(saju.day.branch, p.branch));
-    if (relsDay.includes('육합') || relsDay.includes('삼합')) marry.push('배우자 자리가 다른 글자랑 손을 꼭 잡고(합) 있다. 집안이 화목한 사주다, 할매가 흐뭇하다.');
-    if (relsDay.includes('충')) marry.push('배우자 자리를 치는 글자(충)가 있다. 떨어져 지내는 때가 있거나 다투기 쉬운데, 싸우면 그날 안에 풀어라. 이게 조상 비법이다.');
-    if (relsDay.includes('원진') || relsDay.includes('형')) marry.push('사소한 말에 서운함이 쌓이기 쉬운 자리다. 하루 한 번 "고맙다" 소리 해라, 돈 안 든다.');
-    marry.push(`결혼 인연이 들어오는 때는 아래 대운·해마다 운에서 💍 표시 붙은 해다.`);
+    let risk = 0; const why = [];
+    if (gender === 'F') {
+      if (has('정관') && has('편관')) { risk += 1; why.push('남편 글자가 둘(정관·편관)이라, 인연이 한 사람으로 딱 정해지지 않고 두 번 오기도 한다.'); }
+      if (has('상관') && cnt.관성 >= 1) { risk += 1; why.push('니 말발·재주 기운이 남편 자리를 치는 모양(상관견관)이다. 남편 기 꺾는 말은 아껴라.'); }
+      if (cnt.식상 >= 3) { risk += 0.5; why.push('재주 기운이 넘쳐서 남편 기운을 누른다. 니가 더 잘나 보이는 집이 되기 쉽다.'); }
+      if (cnt.관성 === 0) { risk += 1; why.push('남편 글자가 숨어 있어, 인연이 늦게 오거나 혼자가 편한 시기가 길다.'); }
+      if (palaceGod === '상관') { risk += 1; why.push('배우자 자리에 남편을 치는 기운(상관)이 앉아 있다.'); }
+    } else {
+      if (has('정재') && has('편재')) { risk += 1; why.push('아내 글자가 둘(정재·편재)이라, 인연이 두 번 오기도 한다.'); }
+      if (cnt.비겁 >= 3 && cnt.재성 <= 1) { risk += 1; why.push('니 닮은 기운이 많아서, 짝을 두고 경쟁자가 끼어들거나 마음이 나뉘기 쉽다.'); }
+      if (cnt.재성 === 0) { risk += 1; why.push('아내 글자가 숨어 있어, 인연이 늦게 오거나 혼자가 편한 시기가 길다.'); }
+    }
+    if (palace === '비겁') { risk += 0.5; why.push('배우자 자리에 니 닮은 기운이 앉아 있다. 친구 같지만, 고집 둘이 부딪치면 크게 부딪친다.'); }
+    if (relsDay.includes('충')) { risk += 1.5; why.push('배우자 자리를 정면으로 치는 글자(충)가 있다. 떨어져 살거나 헤어지는 일이 생기기 쉬운 자리다.'); }
+    if (relsDay.includes('원진') || relsDay.includes('형') || relsDay.includes('자형')) { risk += 0.5; why.push('서운함이 소리 없이 쌓이는 자리(형·원진)다. 쌓아 두지 말고 그때그때 풀어라.'); }
+    if (relsDay.includes('육합') || relsDay.includes('삼합')) { risk += 0.5; why.push('배우자 자리가 다른 글자랑 엮여 있다(합). 정이 깊을 수도 있지만, 짝의 마음이 딴 데 묶이기도 하는 자리다.'); }
+
+    if (risk >= 2.5) marry.push('할매가 숨기지 않고 말하꾸마. 니 사주는 부부 인연에 굴곡이 있는 사주다. 첫 인연이 끝까지 가기 어렵거나, 같이 살아도 마음고생이 클 수 있다. 근데 이건 니 잘못이 아이다, 판이 그래 생긴 기다. 늦게 만나거나 다시 만난 인연이 더 맞는 사주가 많데이.');
+    else if (risk >= 1.5) marry.push('부부 사이에 큰 파도가 한두 번은 친다. 떨어져 지내거나 크게 다투는 때가 오는데, 그때 어떻게 넘기냐가 갈림길이다.');
+    else marry.push('부부 인연은 큰 파도보다 잔물결이 많은 편이다. 서운한 건 그날 풀면 오래 간다.');
+    marry.push({
+      비겁: '짝은 친구 같은 사람이 맞다.', 식상: '짝은 같이 웃을 수 있는 사람이 맞다.', 재성: '짝은 살림 야무진 실속파가 맞다.',
+      관성: '짝은 반듯하고 책임감 있는 사람이 맞다.', 인성: '짝은 니를 챙기고 받쳐 주는 사람이 맞다.',
+    }[palace]);
+    why.slice(0, 3).forEach((w) => marry.push(w));
+    marry.push('인연이 들어오는 때는 💍, 사이가 흔들리기 쉬운 때는 💔 표시를 아래 물길에서 봐라.');
 
     const child = [];
     const childCnt = cnt[childGroup];
