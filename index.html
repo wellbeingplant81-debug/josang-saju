@@ -70,6 +70,10 @@
   .du .tx { flex:1; font-size:13.5px; color:#c9bda6; }
   .du .lb { display:inline-block; font-size:12px; font-weight:700; padding:1px 8px; border-radius:2px; margin-bottom:3px; color:#fff; }
   .lb.g2 { background:#2f6b45; } .lb.g1 { background:#3f6b52; } .lb.g0 { background:#4a4a50; } .lb.b1 { background:#8a6a22; } .lb.b2 { background:var(--blood); }
+  .evs { margin-top:6px; font-size:13px; color:#e2d3b3; }
+  .evs div { margin:3px 0; padding-left:2px; }
+  #aPast details { margin-top:14px; }
+  #aPast summary { cursor:pointer; color:var(--main); font-size:15px; padding:8px 0; }
   .conv { font-size:13px; color:var(--main); margin-top:6px; min-height:18px; }
   button.go { width:100%; margin-top:22px; padding:17px; font-size:20px; font-weight:400; font-family:var(--brush); letter-spacing:2px; color:#f6ead2; background:linear-gradient(180deg,#6e1418,#3d0b0e); border:1px solid #a3262a; border-radius:4px; cursor:pointer; animation:pulse 2.4s ease-in-out infinite; }
   @keyframes pulse { 0%,100% { box-shadow:0 0 14px rgba(194,53,58,.25); } 50% { box-shadow:0 0 30px rgba(194,53,58,.55); } }
@@ -197,7 +201,7 @@
       <p class="para" id="aDuHead" style="font-size:13px;color:var(--sub)"></p>
       <div id="aDaeun"></div>
     </div>
-    <div class="card"><h3>📅 조상님이 짚어 준 올해·내년·내후년</h3><div id="aYears"></div></div>
+    <div class="card"><h3>📅 조상님이 짚어 준 올해·내년·내후년</h3><div id="aYears"></div><div id="aPast"></div></div>
 
     <div class="card">
       <h3>☀️ 조상님이 본 오늘의 운세 <span id="rDate" style="font-weight:400;color:var(--sub);font-size:14px"></span></h3>
@@ -340,20 +344,23 @@ $('go').addEventListener('click', () => {
   // 자세히 보기
   const an = Analysis.analyze(saju, gender);
   const li = (arr) => arr.map((t) => `<li>${t}</li>`).join('');
-  const LB = { '아주 좋음': 'g2', '좋음': 'g1', '보통': 'g0', '조심': 'b1', '많이 조심': 'b2' };
+  const LBC = ['g2', 'g1', 'g0', 'b1', 'b2'];
+  const ev = (x) => x.events.length ? `<div class="evs">${x.events.map(([e, t]) => `<div>${e} ${t}</div>`).join('')}</div>` : '';
+  const yearRow = (yy) => `<div class="du">
+    <div class="age">${yy.year}<small>${yy.age}세</small></div>
+    <div class="pz">${yy.pillar.hanja}</div>
+    <div class="tx"><span class="lb ${LBC[yy.level]}">${yy.label}</span><br>${yy.text}${ev(yy)}${yy.spouse ? `<div class="evs"><div>💍 짝·결혼 인연이 들어오는 해</div></div>` : ''}${yy.child ? '<div class="evs"><div>👶 자식 일로 기쁜 소식·신경 쓸 일</div></div>' : ''}</div></div>`;
   $('aPerson').textContent = an.personality;
   $('aBiz').innerHTML = li(an.biz); $('aLove').innerHTML = li(an.love);
   $('aMarry').innerHTML = li(an.marry); $('aChild').innerHTML = li(an.child);
-  $('aDuHead').textContent = `${an.daeun.startAge}세부터 10년마다 운이 바뀌어요(한국 나이). 주황색 줄이 지금이에요.`;
+  $('aDuHead').textContent = `${an.daeun.startAge}세부터 10년마다 물길이 바뀐다(한국 나이). 붉은 줄이 지금이다. 🔒 돈 묶임 · 💥 큰 변화 · 💰 돈 움직임 · 🧲 돈이 붙음 · 🏛️ 책임 · 🤝 계약·만남 · 🫗 나눠 먹는 사람`;
   $('aDaeun').innerHTML = an.daeunList.map((d) => `<div class="du${d.current ? ' now' : ''}">
     <div class="age">${d.age}세~<small>${d.fromYear}~${d.toYear}</small></div>
     <div class="pz">${d.pillar.hanja}</div>
-    <div class="tx"><span class="lb ${LB[d.label]}">${d.label}</span><br>${d.text}${d.spouse ? '<br>💍 짝 인연이 드는 십 년' : ''}</div></div>`).join('');
-  const sp = gender === 'M' ? '이성·결혼 인연이 들어오는 해' : '이성·결혼 인연이 들어오는 해';
-  $('aYears').innerHTML = an.years.map((yy) => `<div class="du">
-    <div class="age">${yy.year}<small>${yy.age}세</small></div>
-    <div class="pz">${yy.pillar.hanja}</div>
-    <div class="tx"><span class="lb ${LB[yy.label]}">${yy.label}</span><br>${yy.text}${yy.spouse ? `<br>💍 ${sp}` : ''}${yy.child ? '<br>👶 자식 일로 기쁜 소식·신경 쓸 일이 생기는 해' : ''}${yy.rel === '충' ? '' : ''}</div></div>`).join('');
+    <div class="tx"><span class="lb ${LBC[d.level]}">${d.label}</span><br>${d.text}${ev(d)}${d.spouse ? '<div class="evs"><div>💍 짝 인연이 드는 십 년</div></div>' : ''}</div></div>`).join('');
+  $('aYears').innerHTML = an.years.map(yearRow).join('');
+  $('aPast').innerHTML = an.pastYears.length
+    ? `<details><summary>🕯️ 지난 해도 맞춰 보기 (${an.pastYears[an.pastYears.length - 1].year}~${an.pastYears[0].year})</summary><p class="note" style="text-align:left">조상님 말이 맞았는지 니 기억이랑 맞춰 봐라. 💥 표시 난 해에 이사·이직·창업 같은 큰일이 있었제?</p>${an.pastYears.map(yearRow).join('')}</details>` : '';
 
   const total = saju.elementCount.reduce((a, b) => a + b, 0);
   const colors = ['#3f8a5a', '#b0392f', '#b08a2e', '#8a8f98', '#3a62a0'];
