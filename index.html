@@ -70,6 +70,21 @@
   .du .tx { flex:1; font-size:13.5px; color:#c9bda6; }
   .du .lb { display:inline-block; font-size:12px; font-weight:700; padding:1px 8px; border-radius:2px; margin-bottom:3px; color:#fff; }
   .lb.g2 { background:#2f6b45; } .lb.g1 { background:#3f6b52; } .lb.g0 { background:#4a4a50; } .lb.b1 { background:#8a6a22; } .lb.b2 { background:var(--blood); }
+  /* 이야기 화면 */
+  #prog, #nav { display:none; }
+  body.storying #prog { display:flex; position:fixed; top:0; left:0; right:0; z-index:5; gap:3px; padding:10px 12px; background:linear-gradient(180deg, rgba(7,8,12,.95), transparent); }
+  #prog i { flex:1; height:3px; background:#2e2a2a; border-radius:2px; }
+  #prog i.done { background:var(--main); box-shadow:0 0 6px rgba(217,164,65,.6); }
+  body.storying #nav { display:flex; position:fixed; bottom:0; left:0; right:0; z-index:5; gap:10px; align-items:center; padding:14px 16px calc(14px + env(safe-area-inset-bottom)); background:linear-gradient(0deg, rgba(7,8,12,.98) 60%, transparent); max-width:480px; margin:0 auto; }
+  #nav #navPrev { flex:0 0 52px; height:52px; border-radius:4px; border:1px solid #3a3330; background:#121014; color:var(--ink); font-size:18px; cursor:pointer; }
+  #nav #navNext { flex:1; height:52px; border-radius:4px; border:1px solid #a3262a; background:linear-gradient(180deg,#6e1418,#3d0b0e); color:#f6ead2; font-family:var(--brush); font-size:18px; cursor:pointer; animation:pulse 2.4s ease-in-out infinite; }
+  #nav #navCount { position:absolute; top:-6px; right:20px; font-size:11px; color:var(--sub); }
+  body.storying header, body.storying footer { display:none; }
+  #result.story { padding:22px 0 100px; }
+  #result.story > .card, #result.story > .btns { display:none; }
+  #result.story > .card.on { display:block; animation:rise .6s ease both; cursor:pointer; }
+  #result.story > .btns.on { display:flex; animation:rise .6s ease both; }
+  .stag { opacity:0; animation:rise .5s ease forwards; }
   .evs { margin-top:6px; font-size:13px; color:#e2d3b3; }
   .evs div { margin:3px 0; padding-left:2px; }
   #aPast details { margin-top:14px; }
@@ -201,7 +216,7 @@
       <p class="para" id="aDuHead" style="font-size:13px;color:var(--sub)"></p>
       <div id="aDaeun"></div>
     </div>
-    <div class="card"><h3>📅 조상님이 짚어 준 올해·내년·내후년</h3><div id="aYears"></div><div id="aPast"></div></div>
+    <div class="card"><h3>📅 조상님이 짚어 준 올해·내년</h3><div id="aYears"></div><div id="aPast"></div></div>
 
     <div class="card">
       <h3>☀️ 조상님이 본 오늘의 운세 <span id="rDate" style="font-weight:400;color:var(--sub);font-size:14px"></span></h3>
@@ -234,6 +249,8 @@
     <canvas id="cv" width="1080" height="1920" style="display:none"></canvas>
   </div>
 
+  <div id="prog"></div>
+  <div id="nav"><button id="navPrev" type="button">◀</button><button id="navNext" type="button">다음 ▶</button><span id="navCount"></span></div>
   <div id="summon"><div class="c">🕯️🕯️</div><p id="summonTx">향 피우는 중…</p></div>
   <footer>조상님 말씀은 재미로 들으래이. 중요한 결정은 니가 하는 기다! · 푸드비트</footer>
 </div>
@@ -354,7 +371,7 @@ $('go').addEventListener('click', () => {
   $('aBiz').innerHTML = li(an.biz); $('aLove').innerHTML = li(an.love);
   $('aMarry').innerHTML = li(an.marry); $('aChild').innerHTML = li(an.child);
   $('aDuHead').textContent = `${an.daeun.startAge}세부터 10년마다 물길이 바뀐다(한국 나이). 붉은 줄이 지금이다. 🔒 돈 묶임 · 💥 큰 변화 · 💰 돈 움직임 · 🧲 돈이 붙음 · 🏛️ 책임 · 🤝 계약·만남 · 🫗 나눠 먹는 사람`;
-  $('aDaeun').innerHTML = an.daeunList.map((d) => `<div class="du${d.current ? ' now' : ''}">
+  $('aDaeun').innerHTML = an.daeunShow.map((d) => `<div class="du${d.current ? ' now' : ''}">
     <div class="age">${d.age}세~<small>${d.fromYear}~${d.toYear}</small></div>
     <div class="pz">${d.pillar.hanja}</div>
     <div class="tx"><span class="lb ${LBC[d.level]}">${d.label}</span><br>${d.text}${ev(d)}${d.spouse ? '<div class="evs"><div>💍 짝 인연이 드는 십 년</div></div>' : ''}</div></div>`).join('');
@@ -392,12 +409,58 @@ $('go').addEventListener('click', () => {
     $('form').style.display = 'none';
     $('result').style.display = 'block';
     window.scrollTo(0, 0);
-    $('result').classList.add('reveal');
-    [...$('result').children].forEach((el, i) => { el.style.animationDelay = (i * 0.25) + 's'; });
+    startStory();
   }, window.__fast ? 0 : 3700);
 });
 
-$('again').addEventListener('click', () => { $('result').style.display = 'none'; $('form').style.display = 'block'; });
+$('again').addEventListener('click', () => { stopStory(); $('result').style.display = 'none'; $('form').style.display = 'block'; });
+
+// ── 탭하며 넘기는 이야기 화면 ─────────────────────
+const TEASE = ['니 사주 여덟 글자, 펼쳐 보자', '다섯 기운을 저울에 올려 보자', '니가 어떤 놈인지 말해 주꾸마', '돈복… 궁금하제?', '연애 얘기 해 보까', '결혼은 우째 되노', '자식 복도 한번 보자', '인생 물길을 펼친다', '올해·내년을 짚어 주꾸마', '오늘 하루는 우떻노', '조상님 마지막 한마디'];
+let slides = [], cur = 0;
+function buildSlides() {
+  const kids = [...$('result').children].filter((el) => el.classList.contains('card') || el.classList.contains('btns'));
+  const cta = kids.find((el) => el.classList.contains('cta')), btns = kids.find((el) => el.classList.contains('btns'));
+  slides = kids.filter((el) => el !== cta && el !== btns).map((el) => [el]);
+  slides.push([cta, btns]);
+}
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.flat().forEach((el) => el.classList.remove('on'));
+  slides[cur].forEach((el) => {
+    el.classList.add('on');
+    el.querySelectorAll('li, .du, .item, .ch, .bar, .lucky > div, .evs > div').forEach((x, k) => {
+      x.classList.remove('stag'); void x.offsetWidth; x.style.animationDelay = (0.25 + k * 0.16) + 's'; x.classList.add('stag');
+    });
+  });
+  $('prog').innerHTML = slides.map((_, k) => `<i class="${k <= cur ? 'done' : ''}"></i>`).join('');
+  $('navPrev').style.visibility = cur === 0 ? 'hidden' : 'visible';
+  const last = cur === slides.length - 1;
+  $('navNext').innerHTML = last ? '🕯️ 처음부터 다시 듣기' : `${TEASE[cur] || '다음'} ▶`;
+  $('navCount').textContent = `${cur + 1} / ${slides.length}`;
+  window.scrollTo(0, 0);
+}
+function startStory() {
+  buildSlides();
+  $('result').classList.add('story');
+  document.body.classList.add('storying');
+  show(0);
+}
+function stopStory() { $('result').classList.remove('story'); document.body.classList.remove('storying'); }
+$('navNext').addEventListener('click', () => (cur === slides.length - 1 ? show(0) : show(cur + 1)));
+$('navPrev').addEventListener('click', () => show(cur - 1));
+// 카드 아무 데나 톡 → 다음 (버튼·펼치기는 제외)
+$('result').addEventListener('click', (e) => {
+  if (!$('result').classList.contains('story') || e.target.closest('button, a, details, summary, select, input')) return;
+  if (cur < slides.length - 1) show(cur + 1);
+});
+// 옆으로 밀기
+let tx = null;
+$('result').addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+$('result').addEventListener('touchend', (e) => {
+  if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1));
+});
 
 // 인스타 스토리용 결과 이미지(1080x1920)
 $('save').addEventListener('click', () => {

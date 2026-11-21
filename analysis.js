@@ -63,19 +63,41 @@
     return out;
   }
 
-  function strength(saju, pos) {
-    const tot = pos.reduce((a, p) => a + p.weight, 0);
-    const sup = pos.filter((p) => p.group === '비겁' || p.group === '인성').reduce((a, p) => a + p.weight, 0);
-    const dmEl = Math.floor(saju.dayMaster / 2);
-    const cnt = saju.elementCount, all = cnt.reduce((a, b) => a + b, 0);
-    const r = (sup / tot + (cnt[dmEl] + cnt[mod(dmEl + 4, 5)]) / all) / 2;
-    return { ratio: r, label: r >= 0.55 ? '신강' : r <= 0.42 ? '신약' : '중화' };
+  // 지장간 전체(여기·중기·본기)와 일수 — 땅 글자 속에 숨은 하늘 글자
+  const JIJANGGAN = [
+    [[8, 10], [9, 20]], [[9, 9], [7, 3], [5, 18]], [[4, 7], [2, 7], [0, 16]], [[0, 10], [1, 20]],
+    [[1, 9], [9, 3], [4, 18]], [[4, 7], [6, 7], [2, 16]], [[2, 10], [5, 9], [3, 11]], [[3, 9], [1, 3], [5, 18]],
+    [[4, 7], [8, 7], [6, 16]], [[6, 10], [7, 20]], [[7, 9], [3, 3], [4, 18]], [[4, 7], [0, 7], [8, 16]],
+  ];
+
+  /* 신강·신약: 득령(월지 3배)·득지(일지 1.5배)·득세(나머지)를 지장간 일수 비율로 나눠 계산 */
+  function strength(saju) {
+    const dm = saju.dayMaster;
+    let sup = 0, tot = 0;
+    const addStem = (s, w) => { tot += w; const g = GROUP[S.tenGod(dm, s)]; if (g === '비겁' || g === '인성') sup += w; };
+    addStem(saju.year.stem, 1); addStem(saju.month.stem, 1); if (saju.hour) addStem(saju.hour.stem, 1);
+    const addBranch = (b, w) => JIJANGGAN[b].forEach(([s, d]) => addStem(s, (w * d) / 30));
+    addBranch(saju.year.branch, 1.2); addBranch(saju.month.branch, 3); addBranch(saju.day.branch, 1.5);
+    if (saju.hour) addBranch(saju.hour.branch, 1.2);
+    const r = sup / tot;
+    return { ratio: r, label: r >= 0.5 ? '신강' : r <= 0.34 ? '신약' : '중화' };
   }
 
-  function favorable(st) {
-    if (st.label === '신강') return { good: ['식상', '재성', '관성'], bad: ['비겁', '인성'] };
-    if (st.label === '신약') return { good: ['인성', '비겁'], bad: ['재성', '관성', '식상'] };
-    return { good: ['식상', '재성', '인성'], bad: [] };
+  /* 도움 되는 기운: 억부(센 건 덜고 약한 건 채움) + 조후(겨울생은 불, 여름생은 물) */
+  function favorable(st, saju) {
+    let f;
+    if (st.label === '신강') f = { good: ['식상', '재성', '관성'], bad: ['비겁', '인성'] };
+    else if (st.label === '신약') f = { good: ['인성', '비겁'], bad: ['재성', '관성', '식상'] };
+    else f = { good: ['식상', '재성', '인성'], bad: [] };
+    const mb = saju.month.branch, dmEl = Math.floor(saju.dayMaster / 2);
+    const need = [11, 0, 1].includes(mb) ? 1 : [5, 6, 7].includes(mb) ? 4 : -1; // 불 / 물
+    let johu = null;
+    if (need >= 0) {
+      johu = ['비겁', '식상', '재성', '관성', '인성'][mod(need - dmEl, 5)];
+      if (!f.good.includes(johu)) f.good.push(johu);
+      f.bad = f.bad.filter((g) => g !== johu);
+    }
+    return { ...f, johu, johuEl: need };
   }
 
   function daeun(saju, gender) {
@@ -155,8 +177,8 @@
     const pos = positions(saju);
     const cnt = { 비겁: 0, 식상: 0, 재성: 0, 관성: 0, 인성: 0 };
     pos.forEach((p) => { cnt[p.group]++; });
-    const st = strength(saju, pos);
-    const fav = favorable(st);
+    const st = strength(saju);
+    const fav = favorable(st, saju);
     const dmEl = Math.floor(saju.dayMaster / 2);
     const goodEls = [...new Set(fav.good.map((g) => groupElement(dmEl, g)))];
     const missingEls = saju.elementCount.map((c, i) => (c === 0 ? i : -1)).filter((i) => i >= 0);
@@ -245,12 +267,16 @@
       return { year: yy, pillar: p, ...r, text: r.text.replace(/십 년/g, '한 해'), age: yy - birthY + 1,
         spouse: r.stemGroup === spouseGroup || r.branchGroup === spouseGroup, child: r.stemGroup === childGroup || r.branchGroup === childGroup };
     };
-    const years = [now, now + 1, now + 2].map(yearInfo);
+    const years = [now, now + 1].map(yearInfo);
     const pastYears = [];
-    for (let yy = now - 1; yy >= Math.max(birthY + 15, now - 25); yy--) pastYears.push(yearInfo(yy));
+    for (let yy = now - 1; yy >= Math.max(birthY + 15, now - 5); yy--) pastYears.push(yearInfo(yy));
     daeunList.forEach((d) => { d.spouse = d.stemGroup === spouseGroup || d.branchGroup === spouseGroup; });
+    // 보여 줄 대운: 지금 기준 앞 2개·지금·뒤 2개 (총 5줄)
+    let ci = daeunList.findIndex((d) => d.current); if (ci < 0) ci = now < daeunList[0].fromYear ? 0 : daeunList.length - 1;
+    const from = Math.max(0, Math.min(ci - 2, daeunList.length - 5));
+    const daeunShow = daeunList.slice(from, from + 5);
 
-    return { pos, cnt, strength: st, fav, goodEls, missingEls, dohwa, yeokma, gunGeop, personality, biz, love, marry, child, daeun: du, daeunList, years, pastYears, spouseGroup, childGroup };
+    return { pos, cnt, strength: st, fav, goodEls, missingEls, dohwa, yeokma, gunGeop, personality, biz, love, marry, child, daeun: du, daeunList, daeunShow, years, pastYears, spouseGroup, childGroup };
   }
 
   const api = { analyze, GROUP_KO };
