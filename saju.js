@@ -139,7 +139,7 @@
 
     // 일·시: 보정한 현지 시각
     const shiftH = p.solarCorrection === false ? 9 : lon / 15; // 보정 끄면 표준시 UTC+9
-    const local = jdToDate(ut + shiftH / 24);
+    const local = jdToDate(ut + shiftH / 24 + 1e-7); // 1e-7일(약 0.01초): 정각 경계 소수점 오차 방지
     const localHour = local.hour;
     let dayJDN = Math.floor(julianDay(local.year, local.month, local.day, 12) + 0.5);
     const lateZi = hasTime && localHour >= 23;

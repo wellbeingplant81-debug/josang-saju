@@ -107,11 +107,14 @@
     const cands = (L) => [y - 1, y, y + 1].map((yy) => S.solarTermJD(yy, L));
     const days = forward ? Math.min(...cands(nextLon).filter((j) => j > saju.ut)) - saju.ut
       : saju.ut - Math.max(...cands(jieLon).filter((j) => j <= saju.ut));
-    const startAge = Math.max(1, Math.round(days / 3));
+    // 3일 = 1년. 생일에서 그만큼 지난 날이 대운 시작일 → 그해의 한국 나이가 대운수
+    const startJD = saju.ut + (days / 3) * 365.2422;
+    const startYear = S.jdToDate(startJD + 9 / 24).year;
+    const startAge = startYear - y + 1;
     let monthIdx = 0; for (let i = 0; i < 60; i++) if (i % 10 === saju.month.stem && i % 12 === saju.month.branch) monthIdx = i;
     const list = [];
-    for (let i = 1; i <= 9; i++) list.push({ age: startAge + (i - 1) * 10, pillar: S.pillar(monthIdx + (forward ? i : -i)) });
-    return { forward, startAge, list };
+    for (let i = 1; i <= 9; i++) list.push({ age: startAge + (i - 1) * 10, fromYear: startYear + (i - 1) * 10, pillar: S.pillar(monthIdx + (forward ? i : -i)) });
+    return { forward, startAge, startYear, list };
   }
 
   const SAMHAP = [[8, 0, 4, 4], [2, 6, 10, 1], [5, 9, 1, 3], [11, 3, 7, 0]]; // 세 글자 + 바뀌는 오행
@@ -258,7 +261,7 @@
     const birthY = saju.input.year;
     const daeunList = du.list.map((d) => {
       const r = rate(saju, fav, d.pillar, ctx);
-      const fromYear = birthY + d.age - 1;
+      const fromYear = d.fromYear;
       return { ...d, ...r, fromYear, toYear: fromYear + 9, current: now >= fromYear && now <= fromYear + 9 };
     });
     const yearInfo = (yy) => {
