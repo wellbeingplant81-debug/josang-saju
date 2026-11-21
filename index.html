@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>조상님 사주</title>
+<meta name="description" content="동해 바닷가 조상님이 직접 봐 주는 내 사주. 사업·연애·결혼·자식운과 10년 운의 흐름까지.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Song+Myung&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#07080c; --card:rgba(22,20,24,.88); --ink:#e9e1d2; --sub:#9b927f; --line:#2e2a2a; --main:#d9a441; --accent:#c2353a; --blood:#8e1d22;
+    --wood:#2f6b45; --fire:#8e2a24; --earth:#8a6a22; --metal:#5d6168; --water:#22406e;
+    --serif:"Gowun Batang","Nanum Myeongjo",serif; --brush:"Song Myung","Gowun Batang",serif; }
+  * { box-sizing:border-box; }
+  html { background:var(--bg); }
+  body { margin:0; min-height:100vh; color:var(--ink); font-family:var(--serif); line-height:1.65;
+    background: radial-gradient(ellipse at 50% -10%, rgba(217,164,65,.18), transparent 55%),
+                radial-gradient(ellipse at 50% 120%, rgba(34,64,110,.35), transparent 60%), var(--bg); background-attachment:fixed; }
+  /* 바다 안개 */
+  .fog { position:fixed; inset:-20% -50%; pointer-events:none; z-index:0; opacity:.18;
+    background: radial-gradient(closest-side, rgba(200,210,230,.5), transparent) 10% 70%/45% 25% no-repeat,
+                radial-gradient(closest-side, rgba(200,210,230,.4), transparent) 70% 40%/55% 30% no-repeat,
+                radial-gradient(closest-side, rgba(200,210,230,.35), transparent) 30% 20%/40% 20% no-repeat;
+    animation: drift 38s linear infinite alternate; filter:blur(6px); }
+  .fog.f2 { animation-duration:55s; animation-direction:alternate-reverse; opacity:.12; }
+  @keyframes drift { from { transform:translateX(-8%); } to { transform:translateX(8%); } }
+  .wrap { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:28px 16px 56px; }
+  header { text-align:center; padding:12px 0 8px; }
+  header .wave { font-size:40px; letter-spacing:18px; }
+  header .wave span { display:inline-block; animation:flick 1.8s infinite alternate; }
+  header .wave span:last-child { animation-delay:.7s; }
+  h1 { font-family:var(--brush); font-weight:400; font-size:38px; margin:6px 0; letter-spacing:1px; color:#f1e6cf; text-shadow:0 0 18px rgba(217,164,65,.35); }
+  header p { margin:0; color:var(--sub); font-size:15px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:6px; padding:20px; margin-top:18px; box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 0 40px rgba(0,0,0,.35); }
+  label { display:block; font-weight:700; font-size:14px; margin:16px 0 6px; color:#d8ccb4; }
+  input, select { width:100%; font-size:17px; padding:12px; border:1px solid #3a3330; border-radius:4px; background:#100f12; color:var(--ink); font-family:var(--serif); color-scheme:dark; }
+  input:focus, select:focus { outline:1px solid var(--main); }
+  .row { display:flex; gap:10px; align-items:center; }
+  .row > * { flex:1; }
+  .check { display:flex; gap:6px; align-items:center; font-size:14px; color:var(--sub); margin-top:8px; font-weight:400; }
+  .check input { width:auto; }
+  .seg { display:flex; background:#100f12; border:1px solid #3a3330; border-radius:4px; padding:3px; }
+  .seg button { flex:1; border:0; background:transparent; padding:10px; font-size:16px; font-weight:700; color:var(--sub); border-radius:3px; cursor:pointer; font-family:var(--serif); }
+  .seg button.on { background:#2a1d1d; color:#f1e6cf; box-shadow:inset 0 0 0 1px var(--blood); }
+  .row select { padding:12px 6px; }
+  .anc { display:flex; align-items:center; gap:12px; justify-content:center; text-align:left; }
+  .anc span { font-size:46px; filter:grayscale(.7) sepia(.5) brightness(.85); animation:ghost 4s ease-in-out infinite; }
+  @keyframes ghost { 0%,100% { opacity:.75; transform:translateY(0); } 50% { opacity:1; transform:translateY(-4px); } }
+  .anc small { display:block; font-size:12px; color:var(--sub); }
+  .anc b { font-size:17px; color:#f1e6cf; }
+  .bubble, .bub { position:relative; background:linear-gradient(180deg,#221c17,#17130f); border:1px solid #4a3a26; border-radius:4px; padding:14px 16px; margin:12px 0 4px; font-size:15.5px; text-align:left; color:#eadcc0; box-shadow:0 0 24px rgba(217,164,65,.08); }
+  .bubble::before { content:""; position:absolute; top:-8px; left:50%; margin-left:-8px; border:8px solid transparent; border-top:0; border-bottom-color:#4a3a26; }
+  .seal { display:inline-block; margin-top:10px; border:2px solid var(--accent); color:var(--accent); font-family:var(--brush); font-size:18px; padding:2px 8px; transform:rotate(-6deg); opacity:.85; letter-spacing:2px; }
+  .ul li::marker { content:"🕯️ "; }
+  #summon { position:fixed; inset:0; background:#000; color:#e9e1d2; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:9; text-align:center; font-size:19px; padding:0 24px; }
+  #summon .c { font-size:64px; letter-spacing:30px; animation:flick .35s infinite alternate; }
+  #summon p { font-family:var(--brush); font-size:24px; min-height:40px; }
+  @keyframes flick { from { opacity:.55; transform:scale(.96) rotate(-1deg); } to { opacity:1; transform:scale(1.04) rotate(1deg); } }
+  .reveal > * { opacity:0; animation:rise 1s ease forwards; }
+  @keyframes rise { from { opacity:0; transform:translateY(14px); filter:blur(3px); } to { opacity:1; transform:none; filter:none; } }
+  .para { margin:0; font-size:15.5px; }
+  .ul { margin:0; padding-left:22px; font-size:15px; }
+  .ul li { margin:8px 0; }
+  .du { display:flex; gap:10px; align-items:flex-start; padding:12px 8px; border-top:1px solid var(--line); }
+  .du.now { background:linear-gradient(90deg, rgba(142,29,34,.35), rgba(142,29,34,.08)); border-left:3px solid var(--accent); border-top-color:transparent; }
+  .du .age { flex:0 0 64px; font-weight:700; font-size:15px; }
+  .du .age small { display:block; font-weight:400; font-size:11px; color:var(--sub); }
+  .du .pz { flex:0 0 48px; font-size:22px; font-family:var(--brush); color:#f1e6cf; }
+  .du .tx { flex:1; font-size:13.5px; color:#c9bda6; }
+  .du .lb { display:inline-block; font-size:12px; font-weight:700; padding:1px 8px; border-radius:2px; margin-bottom:3px; color:#fff; }
+  .lb.g2 { background:#2f6b45; } .lb.g1 { background:#3f6b52; } .lb.g0 { background:#4a4a50; } .lb.b1 { background:#8a6a22; } .lb.b2 { background:var(--blood); }
+  .conv { font-size:13px; color:var(--main); margin-top:6px; min-height:18px; }
+  button.go { width:100%; margin-top:22px; padding:17px; font-size:20px; font-weight:400; font-family:var(--brush); letter-spacing:2px; color:#f6ead2; background:linear-gradient(180deg,#6e1418,#3d0b0e); border:1px solid #a3262a; border-radius:4px; cursor:pointer; animation:pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow:0 0 14px rgba(194,53,58,.25); } 50% { box-shadow:0 0 30px rgba(194,53,58,.55); } }
+  .note { font-size:12px; color:var(--sub); margin-top:10px; text-align:center; }
+  details { margin-top:12px; font-size:13px; color:var(--sub); }
+  #result { display:none; }
+  .hero { text-align:center; }
+  .hero .emoji { font-size:60px; line-height:1.1; margin-top:12px; filter:drop-shadow(0 0 14px rgba(217,164,65,.35)); }
+  .hero h2 { margin:6px 0 2px; font-size:24px; font-family:var(--brush); font-weight:400; color:#f1e6cf; }
+  .hero .tag { display:inline-block; border:1px solid #4a3a26; color:var(--main); border-radius:2px; padding:3px 10px; font-size:13px; }
+  .pillars { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; text-align:center; margin-top:8px; }
+  .pillars .h { font-size:12px; color:var(--sub); }
+  .ch { font-size:30px; font-family:var(--brush); border-radius:3px; padding:6px 0; color:#f3e9d6; margin-top:4px; border:1px solid rgba(255,255,255,.08); box-shadow:inset 0 0 18px rgba(0,0,0,.45); }
+  .ch small { display:block; font-size:11px; font-family:var(--serif); opacity:.85; }
+  .el0{background:var(--wood)} .el1{background:var(--fire)} .el2{background:var(--earth)} .el3{background:var(--metal)} .el4{background:var(--water)} .elx{background:#2a2a2e}
+  .bars { margin-top:6px; }
+  .bar { display:flex; align-items:center; gap:8px; margin:7px 0; font-size:14px; }
+  .bar span:first-child { width:30px; font-weight:700; }
+  .bar .track { flex:1; height:10px; background:#1a181b; border:1px solid #2e2a2a; overflow:hidden; }
+  .bar .fill { height:100%; }
+  h3 { margin:0 0 12px; font-size:18px; font-family:var(--brush); font-weight:400; color:#f1e6cf; letter-spacing:.5px; }
+  .score { font-size:50px; font-family:var(--brush); color:var(--accent); text-align:center; text-shadow:0 0 16px rgba(194,53,58,.45); }
+  .stars { text-align:center; color:var(--main); font-size:22px; letter-spacing:2px; }
+  .kw { text-align:center; font-weight:700; font-size:18px; margin:4px 0 12px; color:#f1e6cf; }
+  .item { display:flex; padding:10px 0; border-top:1px solid var(--line); font-size:15px; }
+  .item b { flex:0 0 56px; color:var(--sub); }
+  .lucky { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .lucky div { background:#121014; border:1px solid var(--line); border-radius:3px; padding:10px; text-align:center; font-size:13px; color:var(--sub); }
+  .lucky strong { display:block; font-size:16px; color:var(--ink); }
+  .cta { background:linear-gradient(180deg,#3d0b0e,#1c0809); border-color:#6e1418; color:#f1e6cf; text-align:center; }
+  .cta p { margin:4px 0; }
+  .cta .big { font-size:24px; font-family:var(--brush); color:var(--main); }
+  .btns { display:flex; gap:10px; margin-top:16px; }
+  .btns button { flex:1; padding:14px; font-size:15px; font-weight:700; border-radius:4px; border:1px solid #3a3330; background:#121014; color:var(--ink); cursor:pointer; font-family:var(--serif); }
+  .warn { background:#241a10; color:#d9b071; border:1px solid #4a3a26; border-radius:3px; padding:8px 10px; font-size:13px; margin-top:10px; }
+  footer { text-align:center; font-size:12px; color:#6f6858; margin-top:28px; }
+</style>
+</head>
+<body>
+<div class="fog"></div><div class="fog f2"></div>
+<div class="wrap">
+  <header>
+    <div class="wave"><span>🕯️</span><span>🕯️</span></div>
+    <h1>조상님이 봐 주는 사주</h1>
+    <p>밤이 깊었다. 동해 바닷바람에 촛불이 흔들린다.<br>오래전 물일 하던 니 조상님이… 니를 부르신다.</p>
+  </header>
+
+  <div class="card" id="form">
+    <label>생년월일</label>
+    <div class="seg" id="calType">
+      <button type="button" data-v="solar" class="on">양력</button>
+      <button type="button" data-v="lunar">음력</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="by" aria-label="태어난 해"></select>
+      <select id="bm" aria-label="태어난 달"></select>
+      <select id="bdd" aria-label="태어난 날"></select>
+    </div>
+    <label class="check" id="leapWrap" style="display:none"><input type="checkbox" id="leap"> 윤달이에요 <span id="leapHint"></span></label>
+    <div class="conv" id="conv"></div>
+    <label>성별 <span style="font-weight:400;color:var(--sub);font-size:12px">(대운 방향·배우자·자식운 계산에 필요해요)</span></label>
+    <div class="seg" id="gender">
+      <button type="button" data-v="M" class="on">남성</button>
+      <button type="button" data-v="F">여성</button>
+    </div>
+    <label for="bt">태어난 시각</label>
+    <input type="time" id="bt" value="12:00">
+    <label class="check"><input type="checkbox" id="noTime"> 시간을 몰라요</label>
+    <label for="city">태어난 곳</label>
+    <select id="city">
+      <option value="126.98">서울·경기·인천</option>
+      <option value="127.73">강원(춘천)</option>
+      <option value="128.90">강원(강릉)</option>
+      <option value="127.49">충북</option>
+      <option value="127.38">대전·충남</option>
+      <option value="127.15">전북</option>
+      <option value="126.85">광주·전남</option>
+      <option value="128.60">대구·경북 내륙</option>
+      <option value="129.36">포항·경북 동해안</option>
+      <option value="129.31">울산</option>
+      <option value="129.08">부산·경남</option>
+      <option value="126.53">제주</option>
+      <option value="135">해외·잘 모름(보정 안 함)</option>
+    </select>
+    <details>
+      <summary>더 정확하게(선택)</summary>
+      <label class="check"><input type="checkbox" id="yajasi"> 밤 11시~자정 출생은 날짜를 바꾸지 않음(야자시)</label>
+      <label class="check"><input type="checkbox" id="noCorr"> 태어난 곳 시간 보정 안 함</label>
+    </details>
+    <button class="go" id="go">🕯️ 조상님 부르기</button>
+    <p class="note">생일은 어디에도 남지 않는다. 니 손전화 안에서만 조용히 풀어 본다.</p>
+  </div>
+
+  <div id="result">
+    <div class="card hero">
+      <div class="anc"><span id="rAncEmoji"></span><div><small>오늘 니 사주 봐 주실 분</small><b id="rAnc"></b></div></div>
+      <div class="bubble" id="rHi"></div>
+      <div class="emoji" id="rEmoji"></div>
+      <div class="seal">祖上印</div><br>
+      <span class="tag" id="rTag"></span>
+      <h2 id="rTitle"></h2>
+      <p id="rLine" style="margin:4px 0 0;color:var(--sub)"></p>
+    </div>
+
+    <div class="card">
+      <h3>📜 나의 사주 여덟 글자</h3>
+      <div class="pillars" id="rPillars"></div>
+      <div id="rWarn"></div>
+    </div>
+
+    <div class="card">
+      <h3>⚖️ 다섯 가지 기운</h3>
+      <div class="bars" id="rBars"></div>
+      <div class="item"><b>강점</b><span id="rGood"></span></div>
+      <div class="item"><b>한마디</b><span id="rCare"></span></div>
+    </div>
+
+    <div class="card"><h3>🕯️ 조상님 왈, 니는 이런 놈이다</h3><p class="para bub" id="aPerson"></p></div>
+    <div class="card"><h3>💼 조상님이 본 사업운·재물운</h3><ul class="ul" id="aBiz"></ul></div>
+    <div class="card"><h3>💘 조상님이 본 연애운</h3><ul class="ul" id="aLove"></ul></div>
+    <div class="card"><h3>💍 조상님이 본 결혼운</h3><ul class="ul" id="aMarry"></ul></div>
+    <div class="card"><h3>👶 조상님이 본 자식운</h3><ul class="ul" id="aChild"></ul></div>
+    <div class="card">
+      <h3>📈 조상님이 펼친 인생 물길 (10년 대운)</h3>
+      <p class="para" id="aDuHead" style="font-size:13px;color:var(--sub)"></p>
+      <div id="aDaeun"></div>
+    </div>
+    <div class="card"><h3>📅 조상님이 짚어 준 올해·내년·내후년</h3><div id="aYears"></div></div>
+
+    <div class="card">
+      <h3>☀️ 조상님이 본 오늘의 운세 <span id="rDate" style="font-weight:400;color:var(--sub);font-size:14px"></span></h3>
+      <div class="score" id="rScore"></div>
+      <div class="stars" id="rStars"></div>
+      <div class="kw" id="rKw"></div>
+      <div class="item"><b>총운</b><span id="rAll"></span></div>
+      <div class="item"><b>돈</b><span id="rMoney"></span></div>
+      <div class="item"><b>사랑</b><span id="rLove"></span></div>
+      <div class="item"><b>꿀팁</b><span id="rTip"></span></div>
+      <div class="lucky">
+        <div>행운의 색<strong id="rColor"></strong></div>
+        <div>행운의 숫자<strong id="rNum"></strong></div>
+        <div>행운의 방향<strong id="rDir"></strong></div>
+        <div>행운의 바다음식<strong id="rSea"></strong></div>
+      </div>
+    </div>
+
+    <div class="card cta">
+      <p>조상님 왈, "오늘 니한테 필요한 바다 기운은</p>
+      <p class="big" id="rCta"></p>
+      <p>묵어 봐라" 🐟</p>
+      <p>네이버에서 <b>푸드비트</b>를 검색하세요 🐟</p>
+    </div>
+
+    <div class="btns">
+      <button id="save">📸 결과 이미지 저장</button>
+      <button id="again">↩︎ 다시 보기</button>
+    </div>
+    <canvas id="cv" width="1080" height="1920" style="display:none"></canvas>
+  </div>
+
+  <div id="summon"><div class="c">🕯️🕯️</div><p id="summonTx">향 피우는 중…</p></div>
+  <footer>조상님 말씀은 재미로 들으래이. 중요한 결정은 니가 하는 기다! · 푸드비트</footer>
+</div>
+
+<script src="saju.js"></script>
+<script src="lunar.js"></script>
+<script src="fortune.js"></script>
+<script src="analysis.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const EL_CLASS = (i) => 'el' + i;
+let last = null;
+
+function todayKST() {
+  const n = new Date(Date.now() + 9 * 3600 * 1000);
+  return { y: n.getUTCFullYear(), m: n.getUTCMonth() + 1, d: n.getUTCDate() };
+}
+
+$('noTime').addEventListener('change', (e) => { $('bt').disabled = e.target.checked; });
+
+// 생년월일 고르기(양력/음력)
+let calType = 'solar';
+const fill = (sel, from, to, val, suffix) => {
+  sel.innerHTML = '';
+  for (let i = from; i <= to; i++) sel.add(new Option(i + suffix, i));
+  sel.value = Math.min(Math.max(val, from), to);
+};
+fill($('by'), 1930, 2026, 1990, '년'); fill($('bm'), 1, 12, 1, '월');
+function refreshDays() {
+  const y = +$('by').value, m = +$('bm').value, cur = +$('bdd').value || 1;
+  let max;
+  if (calType === 'solar') max = new Date(y, m, 0).getDate();
+  else {
+    const lm = Lunar.leapMonthOf(y);
+    $('leapWrap').style.display = lm === m ? 'flex' : 'none';
+    if (lm !== m) $('leap').checked = false;
+    $('leapHint').textContent = lm === m ? `(${y}년은 윤${m}월이 있어요)` : '';
+    max = Lunar.daysInLunarMonth(y, m, $('leap').checked) || 30;
+  }
+  if (calType === 'solar') $('leapWrap').style.display = 'none';
+  fill($('bdd'), 1, max, cur, '일');
+  showConv();
+}
+function birthSolar() {
+  const y = +$('by').value, m = +$('bm').value, d = +$('bdd').value;
+  if (calType === 'solar') return { year: y, month: m, day: d };
+  return Lunar.lunarToSolar(y, m, d, $('leap').checked);
+}
+function showConv() {
+  if (calType === 'solar') { $('conv').textContent = ''; return; }
+  const s = birthSolar();
+  $('conv').textContent = s ? `→ 양력 ${s.year}년 ${s.month}월 ${s.day}일로 계산해요` : '없는 날짜예요';
+}
+['by', 'bm'].forEach((id) => $(id).addEventListener('change', refreshDays));
+$('bdd').addEventListener('change', showConv);
+$('leap').addEventListener('change', refreshDays);
+$('calType').addEventListener('click', (e) => {
+  const v = e.target.dataset.v; if (!v) return;
+  calType = v;
+  [...$('calType').children].forEach((b) => b.classList.toggle('on', b.dataset.v === v));
+  refreshDays();
+});
+refreshDays();
+let gender = 'M';
+$('gender').addEventListener('click', (e) => {
+  const v = e.target.dataset.v; if (!v) return;
+  gender = v;
+  [...$('gender').children].forEach((b) => b.classList.toggle('on', b.dataset.v === v));
+});
+
+$('go').addEventListener('click', () => {
+  const sb = birthSolar();
+  if (!sb) { alert('없는 날짜예요. 음력 날짜를 다시 확인해 주세요'); return; }
+  const { year: y, month: m, day: d } = sb;
+  const noTime = $('noTime').checked;
+  const [hh, mi] = noTime ? [null, 0] : $('bt').value.split(':').map(Number);
+  const lon = Number($('city').value);
+  const saju = Saju.calcSaju({ year: y, month: m, day: d, hour: hh, minute: mi, longitude: lon,
+    solarCorrection: !$('noCorr').checked && lon !== 135, yajasi: $('yajasi').checked });
+  const today = todayKST();
+  const f = Fortune.personalDaily(saju, today);
+  const dm = Fortune.DAY_MASTER[saju.dayMaster];
+  last = { saju, f, dm, today };
+
+  $('rAncEmoji').textContent = dm.aEmoji;
+  $('rAnc').textContent = dm.ancestor;
+  $('rHi').textContent = `${dm.hi} 니는 「${dm.sea}」 기운을 타고났데이. ${dm.care}`;
+  $('rEmoji').textContent = dm.emoji;
+  $('rTag').textContent = `${dm.name} · ${dm.nick} · ${saju.animal}띠`;
+  $('rTitle').textContent = `나는 「${dm.sea}」 바다친구!`;
+  $('rLine').textContent = dm.line;
+
+  const heads = ['시주', '일주', '월주', '년주'];
+  const order = [saju.hour, saju.day, saju.month, saju.year];
+  $('rPillars').innerHTML = order.map((p, i) => {
+    if (!p) return `<div><div class="h">${heads[i]}</div><div class="ch elx">?<small>모름</small></div><div class="ch elx">?<small>모름</small></div></div>`;
+    const se = Math.floor(p.stem / 2), be = Saju.BRANCH_ELEMENT[p.branch];
+    return `<div><div class="h">${heads[i]}${i === 1 ? ' (나)' : ''}</div>
+      <div class="ch ${EL_CLASS(se)}">${Saju.STEMS[p.stem]}<small>${Saju.STEMS_KO[p.stem]}·${Saju.ELEMENTS[se]}</small></div>
+      <div class="ch ${EL_CLASS(be)}">${Saju.BRANCHES[p.branch]}<small>${Saju.BRANCHES_KO[p.branch]}·${Saju.ELEMENTS[be]}</small></div></div>`;
+  }).join('');
+  const warns = [];
+  if (calType === 'lunar') warns.push(`음력 ${$('by').value}년 ${$('leap').checked ? '윤' : ''}${$('bm').value}월 ${$('bdd').value}일 = 양력 ${y}년 ${m}월 ${d}일로 계산했어요.`);
+  if (saju.nearJie) warns.push('절기가 바뀌는 시각 근처에 태어나셨어요. 몇 분 차이로 월주가 달라질 수 있어요.');
+  if (saju.dst) warns.push('서머타임 기간 출생이라 1시간을 빼고 계산했어요.');
+  $('rWarn').innerHTML = warns.map((w) => `<div class="warn">${w}</div>`).join('');
+
+  // 자세히 보기
+  const an = Analysis.analyze(saju, gender);
+  const li = (arr) => arr.map((t) => `<li>${t}</li>`).join('');
+  const LB = { '아주 좋음': 'g2', '좋음': 'g1', '보통': 'g0', '조심': 'b1', '많이 조심': 'b2' };
+  $('aPerson').textContent = an.personality;
+  $('aBiz').innerHTML = li(an.biz); $('aLove').innerHTML = li(an.love);
+  $('aMarry').innerHTML = li(an.marry); $('aChild').innerHTML = li(an.child);
+  $('aDuHead').textContent = `${an.daeun.startAge}세부터 10년마다 운이 바뀌어요(한국 나이). 주황색 줄이 지금이에요.`;
+  $('aDaeun').innerHTML = an.daeunList.map((d) => `<div class="du${d.current ? ' now' : ''}">
+    <div class="age">${d.age}세~<small>${d.fromYear}~${d.toYear}</small></div>
+    <div class="pz">${d.pillar.hanja}</div>
+    <div class="tx"><span class="lb ${LB[d.label]}">${d.label}</span><br>${d.text}${d.spouse ? '<br>💍 짝 인연이 드는 십 년' : ''}</div></div>`).join('');
+  const sp = gender === 'M' ? '이성·결혼 인연이 들어오는 해' : '이성·결혼 인연이 들어오는 해';
+  $('aYears').innerHTML = an.years.map((yy) => `<div class="du">
+    <div class="age">${yy.year}<small>${yy.age}세</small></div>
+    <div class="pz">${yy.pillar.hanja}</div>
+    <div class="tx"><span class="lb ${LB[yy.label]}">${yy.label}</span><br>${yy.text}${yy.spouse ? `<br>💍 ${sp}` : ''}${yy.child ? '<br>👶 자식 일로 기쁜 소식·신경 쓸 일이 생기는 해' : ''}${yy.rel === '충' ? '' : ''}</div></div>`).join('');
+
+  const total = saju.elementCount.reduce((a, b) => a + b, 0);
+  const colors = ['#3f8a5a', '#b0392f', '#b08a2e', '#8a8f98', '#3a62a0'];
+  $('rBars').innerHTML = saju.elementCount.map((c, i) =>
+    `<div class="bar"><span>${Saju.ELEMENTS[i]}</span><div class="track"><div class="fill" style="width:${c / total * 100}%;background:${colors[i]}"></div></div><span>${c}</span></div>`).join('');
+  $('rGood').textContent = dm.good;
+  $('rCare').textContent = dm.care;
+
+  $('rDate').textContent = `${today.m}월 ${today.d}일 (${f.today.ko}일)`;
+  $('rScore').textContent = f.score + '점';
+  $('rStars').textContent = f.stars;
+  $('rKw').textContent = `「${f.keyword}」`;
+  $('rAll').textContent = f.all;
+  $('rMoney').textContent = f.money;
+  $('rLove').textContent = f.love;
+  $('rTip').textContent = f.tip;
+  $('rColor').textContent = f.luckyColor;
+  $('rNum').textContent = f.luckyNumber;
+  $('rDir').textContent = f.luckyDir;
+  $('rSea').textContent = f.luckySea;
+  $('rCta').textContent = `「${f.luckySea}」`;
+
+  // 조상님 부르는 연출(약 2초)
+  const sm = $('summon'), steps = ['…향을 피운다', '바닷바람에 촛불이 꺾인다', '누가… 니 이름을 부른다', `${dm.ancestor}가 오셨다`];
+  sm.style.display = 'flex';
+  steps.forEach((t, i) => setTimeout(() => { const p = $('summonTx'); p.textContent = t; p.style.animation = 'none'; p.offsetHeight; p.style.animation = 'rise .9s ease'; }, i * 900));
+  setTimeout(() => {
+    sm.style.display = 'none';
+    $('form').style.display = 'none';
+    $('result').style.display = 'block';
+    window.scrollTo(0, 0);
+    $('result').classList.add('reveal');
+    [...$('result').children].forEach((el, i) => { el.style.animationDelay = (i * 0.25) + 's'; });
+  }, window.__fast ? 0 : 3700);
+});
+
+$('again').addEventListener('click', () => { $('result').style.display = 'none'; $('form').style.display = 'block'; });
+
+// 인스타 스토리용 결과 이미지(1080x1920)
+$('save').addEventListener('click', () => {
+  if (!last) return;
+  const { saju, f, dm, today } = last;
+  const c = $('cv'), g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 1920);
+  grad.addColorStop(0, '#1a1410'); grad.addColorStop(0.55, '#0a0a0e'); grad.addColorStop(1, '#0d1626');
+  g.fillStyle = grad; g.fillRect(0, 0, 1080, 1920);
+  g.textAlign = 'center'; g.fillStyle = '#f1e6cf';
+  const font = (w, s) => `${w} ${s}px "Gowun Batang","Malgun Gothic",serif`;
+  g.font = font(700, 54); g.fillText(`🕯️ ${today.m}월 ${today.d}일 조상님이 봐 준 내 사주`, 540, 200); g.font = font(500, 40); g.fillText(dm.ancestor + ' 왈', 540, 270);
+  g.font = font(400, 200); g.fillText(dm.emoji, 540, 500);
+  g.font = font(800, 84); g.fillText(`나는 「${dm.sea}」!`, 540, 660);
+  g.font = font(500, 44); g.fillText(dm.line, 540, 740);
+  g.fillStyle = 'rgba(30,24,20,.92)'; roundRect(g, 90, 820, 900, 820, 48); g.fill();
+  g.fillStyle = '#f1e6cf'; g.font = font(600, 46); g.fillText('조상님이 본 오늘', 540, 920);
+  g.fillStyle = '#c2353a'; g.font = font(800, 150); g.fillText(f.score + '점', 540, 1090);
+  g.fillStyle = '#d9a441'; g.font = font(400, 64); g.fillText(f.stars, 540, 1180);
+  g.fillStyle = '#f1e6cf'; g.font = font(700, 54); g.fillText(`「${f.keyword}」`, 540, 1290);
+  g.font = font(500, 42); g.fillStyle = '#b9ad95';
+  g.fillText(`행운의 색 ${f.luckyColor} · 숫자 ${f.luckyNumber}`, 540, 1400);
+  g.fillText(`행운의 바다음식 ${f.luckySea}`, 540, 1470);
+  g.fillText(`${saju.day.ko}일주 · ${saju.animal}띠`, 540, 1560);
+  g.fillStyle = '#d9a441'; g.font = font(700, 50); g.fillText('니 조상님은 뭐라 카시노? 프로필 링크!', 540, 1760);
+  g.font = font(500, 38); g.fillText('조상님 말씀은 재미로 · 푸드비트', 540, 1840);
+  const a = document.createElement('a');
+  a.download = `조상님사주_${today.m}${today.d}.png`; a.href = c.toDataURL('image/png'); a.click();
+});
+function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+</script>
+</body>
+</html>
