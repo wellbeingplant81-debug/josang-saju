@@ -250,9 +250,8 @@
       <p class="big" id="rxFood"></p>
       <p id="rxWhy"></p>
       <p id="rxHow" style="color:var(--sub)"></p>
-      <a class="go2" id="rxNaver" target="_blank" rel="noopener">🕯️ 처방 받으러 가기</a>
-      <a class="sub" id="rxCoupang" target="_blank" rel="noopener">쿠팡에서 보기</a>
-      <p style="margin-top:12px">오늘 행운의 바다음식은 <b id="rCta"></b> · 네이버에서 <b>푸드비트</b>를 검색하세요 🐟</p>
+      <!-- 11-22 대표님 「푸드비트얘기는 빼자 아직 광고는 시기상조」: 스토어·쿠팡 링크와 푸드비트 문구를 뺐다 -->
+      <p style="margin-top:12px">오늘 행운의 바다음식은 <b id="rCta"></b> 🐟<br>마음이 시끄러운 날엔 따신 밥 한 그릇 챙기 묵고, 니 자신부터 쉬게 해라.</p>
     </div>
 
     <div class="btns">
@@ -266,7 +265,7 @@
   <div id="prog"></div>
   <div id="nav"><button id="navPrev" type="button">◀</button><button id="navNext" type="button">다음 ▶</button><span id="navCount"></span></div>
   <div id="summon"><div class="c">🕯️🕯️</div><p id="summonTx">향 피우는 중…</p></div>
-  <footer>조상님 말씀은 재미로 들으래이. 중요한 결정은 니가 하는 기다! · 푸드비트</footer>
+  <footer>조상님 말씀은 재미로 들으래이. 중요한 결정은 니가 하는 기다!</footer>
 </div>
 
 <script src="saju.js"></script>
@@ -451,8 +450,6 @@ $('go').addEventListener('click', () => {
   $('rxFood').textContent = `${rx.emoji} ${rx.food}`;
   $('rxWhy').textContent = voice(rx.why);
   $('rxHow').textContent = `"${rx.how}"`;
-  $('rxNaver').href = rx.naver;
-  $('rxCoupang').href = rx.coupang;
 
   // 조상님 부르는 연출(약 2초)
   const sm = $('summon'), steps = ['…향을 피운다', '바닷바람에 촛불이 꺾인다', '누가… 니 이름을 부른다', `${dm.ancestor}가 오셨다`];
@@ -581,7 +578,7 @@ $('save').addEventListener('click', () => {
   g.fillText(`행운의 바다음식 ${f.luckySea}`, 540, 1470);
   g.fillText(`${saju.day.ko}일주 · ${saju.animal}띠`, 540, 1560);
   g.fillStyle = '#d9a441'; g.font = font(700, 50); g.fillText('니 조상님은 뭐라 카시노? 프로필 링크!', 540, 1760);
-  g.font = font(500, 38); g.fillText('조상님 말씀은 재미로 · 푸드비트', 540, 1840);
+  g.font = font(500, 38); g.fillText('조상님 말씀은 재미로 들으래이', 540, 1840);
   const a = document.createElement('a');
   a.download = `조상님사주_${today.m}${today.d}.png`; a.href = c.toDataURL('image/png'); a.click();
 });
