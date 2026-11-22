@@ -5,6 +5,7 @@
  */
 (function (root) {
   const S = root.Saju || (typeof require !== 'undefined' ? require('./saju.js') : null);
+  const I = root.Ilju || (typeof require !== 'undefined' ? require('./ilju.js') : null);
   const mod = (a, n) => ((a % n) + n) % n;
   const HIDDEN = [9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8]; // 지장간 본기
   const GROUP = { 비견: '비겁', 겁재: '비겁', 식신: '식상', 상관: '식상', 편재: '재성', 정재: '재성', 편관: '관성', 정관: '관성', 편인: '인성', 정인: '인성' };
@@ -19,14 +20,20 @@
     신강: [
       '니는 고집이 동해 바위만 하다. 근데 그 고집이 니 밥줄이데이. 남 밑에 있으면 답답해서 몬 산다, 니 일을 해야 빛나는 기라.',
       '아이고, 기운 센 거 봐라. 니는 파도가 쳐도 안 꺾이는 사주다. 대신 가끔은 돛을 내리고 쉬어 가래이.',
+      '니는 앞장서야 직성이 풀린다. 뒤에서 따라가면 속이 터져서 몬 산다.',
+      '힘이 넘쳐서 탈이다. 그 힘을 한 군데로 모으면 산도 옮기는 사주다.',
     ],
     신약: [
       '니는 혼자 끙끙대면 안 되는 사주다. 좋은 사람 옆에 두면 힘이 열 배로 커진데이. 사람 복이 곧 니 복이다.',
       '마음이 여리고 눈치가 빠르다. 그게 약점 같제? 아이다, 사람 마음 읽는 게 니 무기다.',
+      '니는 남 부탁을 몬 거절한다. 그 착한 마음 때문에 손해도 봤지만, 결국 그게 사람을 남긴다.',
+      '겉으로는 괜찮다 캐도 속으로 걱정을 끼고 사는 사주다. 니 혼자 다 짊어질 필요 없다.',
     ],
     중화: [
       '니는 이래 불어도 저래 불어도 잘 굴러가는 배다. 균형이 잘 잡혀서 할배가 걱정을 덜 해도 되겠다.',
       '모난 데 없이 둥글둥글한 사주다. 어디 가도 밥은 안 굶는다, 할매가 보장한데이.',
+      '니는 판단이 빠르고 치우침이 없다. 사람들이 싸우면 니한테 와서 물어본다.',
+      '물 들어오면 노 젓고, 물 빠지면 그물 손질할 줄 아는 놈이다.',
     ],
   };
   const MAIN = {
@@ -195,13 +202,12 @@
     const gunGeop = cnt.비겁 >= 3 && cnt.재성 <= 1;
     const ctx = { wealthB: wealthBranches(saju), wealthEl: groupElement(dmEl, '재성'), wealthCnt: cnt.재성, gunGeop, strong: st.label === '신강' };
 
-    const personality = [pick(PERSON[st.label], seed), MAIN[top],
+    const ij = I.ilju(saju);
+    const personality = [ij.season, `니는 ${ij.name}, 옛말로 「${ij.nick}」이다.`, ij.self, pick(PERSON[st.label], seed), MAIN[top],
       missingEls.length ? `근데 ${missingEls.map((i) => E[i]).join('·')} 기운이 하나도 없데이. 걱정 마라, 그건 일·사람·밥상으로 채우면 된다.` : '다섯 기운이 다 들어 있다. 이래 고루 갖춘 사주 드물데이.'].join(' ');
 
     const biz = [];
-    biz.push(st.label === '신강' ? '니는 사장 할 팔자다. 결정 빠르고 버티는 힘 있으니 니가 직접 키를 잡아라.'
-      : st.label === '신약' ? '혼자 다 할라 카지 마라. 믿을 사람 하나, 잘 돌아가는 시스템 하나 붙이면 배가 쭉쭉 나간다.'
-        : '천천히, 꾸준히 키우는 장사가 니한테 맞다. 한 방보다 오래 가는 배가 이긴데이.');
+    biz.push(I.BIZ_OPEN[st.label][top]);
     if (cnt.재성 === 0) biz.push('사주에 돈 글자가 안 보인다꼬 서운해하지 마라. 니는 돈을 쫓는 게 아이라 신용을 쌓으면 돈이 알아서 따라오는 사주다.');
     else if (cnt.재성 >= 3) biz.push('돈 글자가 사주에 그득하다! 기회는 자꾸 오는데, 다 잡을라 카면 그물 찢어진다. 골라서 잡아라.');
     else if (gunGeop) biz.unshift(`⚠️ 할배가 젤 먼저 할 말이 있다. 니 사주는 니 닮은 기운이 ${cnt.비겁}개인데 돈 글자는 ${cnt.재성}개뿐이다. 옛날 말로 「군겁쟁재」, 형제들이 고기 한 마리를 두고 다투는 모양이다. 니가 아무리 그물을 던져도 나눠 줄 데·새는 데·경쟁자가 많아서 손에 남기가 힘들었을 기라. 니 탓이 아이다, 판이 그래 생긴 기다. 그러니 돈줄은 니가 꼭 쥐고, 나눠 먹는 구조부터 끊어라.`);
@@ -209,7 +215,9 @@
     if (cnt.비겁 >= 3 && !gunGeop) biz.push('니 닮은 기운이 많아서 경쟁자가 늘 옆에 있다. 동업하면 고기를 나눠 묵게 되니 돈줄은 니가 꼭 쥐고 있어라. 대신 사람 거느리는 힘은 장군감이다.');
     if (cnt.식상 === 0) biz.push('재주 기운이 없다꼬 기죽지 마래이. 홍보·기획은 잘하는 사람이나 요즘 기계(AI·영상)한테 맡기면 된다. 니는 큰 그림만 그려라.');
     else if (cnt.식상 >= 2) biz.push('말발·손재주가 니 무기다. 직접 만들고 직접 알리면 손님이 알아서 찾아온다.');
-    if (cnt.관성 >= 1) biz.push('명예 기운이 있어서 약속 지키고 원칙대로 하면 거래처가 대를 이어 간다.');
+    const gwan = pos.find((p) => p.group === '관성');
+    if (gwan) biz.push({ 년: '책임 기운이 집안(년주)에 있다. 집안 이름·고향 인연이 일에 힘이 된다.', 월: '책임 기운이 일터 자리(월주)에 있다. 조직·거래처에서 인정받는 자리에 오른다.',
+      일: '책임 기운이 니 발밑(일지)에 있다. 남이 시키기 전에 스스로 짐을 지는 놈이다.', 시: '책임 기운이 말년 자리(시주)에 있다. 늦게 갈수록 이름이 난다.' }[gwan.where[0]]);
     biz.push(`니한테 맞는 물길: ${goodEls.map((i) => `${E[i]}(${ELEMENT_WORK[i]})`).join(', ')}.`);
     if (missingEls.includes(4) && goodEls.includes(4)) biz.push('사주에 물이 한 방울도 없는데 바다 일을 한다꼬? 아이고 잘했다! 모자란 기운을 일로 채우는 거, 그게 바로 조상 덕이다.');
     if (yeokma >= 1) biz.push('움직이는 별(역마)이 있다. 가만 앉아 있으면 운이 고이고, 현장 뛰고 배송 보내고 사람 만나야 운이 돈다.');
@@ -221,6 +229,7 @@
     love.push(dohwa >= 2 ? `인기 별(도화)이 ${dohwa}개다. 니 젊을 때 동네 처녀총각들 마이 울렸제? 말 한마디, 눈빛 한 번에 호감 사는 타입이다.`
       : dohwa === 1 ? '인기 별(도화)이 하나 있어서 은근한 매력이 있다. 알면 알수록 빠져드는 맛이 있는 기라.'
         : '도화는 없다. 첫눈에 반하게 하는 타입은 아이지만, 오래 볼수록 진국이라 한 번 잡으면 안 놓친다.');
+    love.push(ij.spouse);
     if (!spousePos) love.push('사주에 짝 글자가 숨어 있다. 연애는 늦게 불붙거나, 일하다가 모임 나가다가 슬그머니 온다.');
     else if (cnt[spouseGroup] >= 3) love.push('짝 글자가 많아서 인연이 자꾸 찾아온다. 한 사람한테 마음 주는 게 니 행복의 열쇠데이.');
     else love.push(`짝 글자가 알맞게 있다. ${spousePos.where.startsWith('월') ? '일터나 사회생활에서' : spousePos.where.startsWith('년') ? '어릴 적 친구나 고향 인연 중에서' : '가까운 생활 반경에서'} 인연이 닿는다.`);
@@ -267,6 +276,7 @@
     child.push(childCnt === 0 ? '자식 글자가 숨어 있다. 자식이랑은 친구처럼, 한 발짝 떨어져서 믿어 주는 게 젤 잘 맞는다.'
       : childCnt >= 2 ? '자식 글자가 넉넉하다. 자식 복 있다, 자식 땜에 웃을 일이 많을 기라.'
         : '자식 글자가 하나 있다. 정이 깊어서 한 명 한 명 온 정성으로 키우는 부모다.');
+    if (saju.hour) child.push(I.CHILD_ANIMAL[saju.hour.branch]);
     if (saju.hour) {
       const hg = GROUP[S.tenGod(saju.dayMaster, HIDDEN[saju.hour.branch])];
       child.push({
@@ -274,7 +284,7 @@
         식상: '자식 자리에 재주 기운이 있다. 끼 많고 말 잘하는 자식이다, 무대 체질일 수도 있데이.',
         재성: '자식 자리에 돈 기운이 있다. 경제 감각 있는 자식이라 늙어서 실속 챙겨 준다.',
         관성: '자식 자리에 명예 기운이 있다. 반듯하게 커서 집안 이름을 빛낸다.',
-        인성: '자식 자리에 도움 기운이 있다. 공부 운 있고, 부모 잘 챙기는 효자·효녀다.',
+        인성: '자식 자리에 도움 기운이 있다. 공부 운 있고, 커서 부모 잘 챙기는 자식이 되기 쉽다.',
       }[hg]);
     } else child.push('태어난 시간을 알면 자식 자리(시주)까지 봐 줄 수 있는데… 어무이한테 한번 물어봐라.');
 
@@ -306,7 +316,7 @@
     const from = Math.max(0, Math.min(ci - 2, daeunList.length - 5));
     const daeunShow = daeunList.slice(from, from + 5);
 
-    return { pos, cnt, strength: st, fav, goodEls, missingEls, dohwa, yeokma, gunGeop, personality, biz, love, marry, child, daeun: du, daeunList, daeunShow, years, pastYears, spouseGroup, childGroup, yearInfo, birthY, now };
+    return { pos, cnt, strength: st, fav, goodEls, missingEls, dohwa, yeokma, gunGeop, ilju: ij, personality, biz, love, marry, child, daeun: du, daeunList, daeunShow, years, pastYears, spouseGroup, childGroup, yearInfo, birthY, now };
   }
 
   const api = { analyze, GROUP_KO };

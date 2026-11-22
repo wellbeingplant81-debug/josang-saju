@@ -272,6 +272,7 @@
 <script src="saju.js"></script>
 <script src="lunar.js"></script>
 <script src="fortune.js"></script>
+<script src="ilju.js"></script>
 <script src="analysis.js"></script>
 <script src="medium.js"></script>
 <script>
@@ -384,6 +385,7 @@ $('go').addEventListener('click', () => {
     <div class="pz">${yy.pillar.hanja}</div>
     <div class="tx"><span class="lb ${LBC[yy.level]}">${yy.label}</span><br>${yy.text}${ev(yy)}${yy.spouse ? `<div class="evs"><div>💍 짝·결혼 인연이 들어오는 해</div></div>` : ''}${yy.child ? '<div class="evs"><div>👶 자식 일로 기쁜 소식·신경 쓸 일</div></div>' : ''}</div></div>`;
   $('aPerson').textContent = an.personality;
+  $('rTag').textContent = `${dm.name} · ${an.ilju.name}(${an.ilju.nick}) · ${saju.animal}띠`;
   $('aBiz').innerHTML = li(an.biz); $('aLove').innerHTML = li(an.love);
   $('aMarry').innerHTML = li(an.marry); $('aChild').innerHTML = li(an.child);
   $('aDuHead').textContent = `${an.daeun.startAge}세부터 10년마다 물길이 바뀐다(한국 나이). 붉은 줄이 지금이다. 🔒 돈 묶임 · 💥 큰 변화 · 💰 돈 움직임 · 🧲 돈이 붙음 · 🏛️ 책임 · 🤝 계약·만남 · 🫗 나눠 먹는 사람 · 💔 짝과 거리`;

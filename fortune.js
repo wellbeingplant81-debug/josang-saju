@@ -57,6 +57,15 @@
   const stars = (score) => { const n = Math.max(1, Math.round(score / 20)); return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); };
   function weakestElement(count) { let min = Infinity, idx = 0; count.forEach((c, i) => { if (c < min) { min = c; idx = i; } }); return idx; }
 
+  // 같은 기운 날이라도 사람마다 덧붙는 한마디 (사주 날 기둥·띠·날짜로 고름)
+  const EXTRA = {
+    money: ['오후 세 시 넘어 들어오는 연락에 돈 냄새가 난다.', '지갑 정리하다 잊은 돈 찾는다.', '충동 결제는 하룻밤 재워라.', '작은 돈 아끼다 큰돈 놓친다. 쓸 데는 써라.',
+      '오늘 받은 견적은 한 번 더 깎아 봐라.', '돈 얘기는 저녁보다 아침에 해라.', '빌려준 돈 슬쩍 물어봐도 되는 날이다.', '장 볼 때 바다음식 하나 담으면 운이 붙는다.'],
+    love: ['먼저 안부 묻는 쪽이 이긴다.', '오늘 짝한테 한 칭찬은 열 배로 돌아온다.', '옛 인연 소식이 들려도 흔들리지 마라.', '말보다 같이 밥 한 끼가 낫다.',
+      '서운한 건 오늘 안에 풀어라.', '눈 마주치고 웃어 주면 반은 먹고 들어간다.', '혼자라면 모임에 얼굴 내밀어라, 인연은 거기 있다.', '오늘은 듣는 쪽이 돼라, 그게 사랑이다.'],
+    tip: ['물 한 잔 마시고 시작해라.', '오른쪽 주머니를 비워 둬라, 복 들어올 자리다.', '현관 신발 한번 가지런히 놔라.', '창문 열고 바람 한 번 들여라.',
+      '해 질 녘 바다 쪽(동쪽) 한번 바라봐라.', '오늘 처음 만나는 사람한테 웃어 줘라.', '안 쓰는 물건 하나 버려라, 묵은 기운이 나간다.', '잠들기 전 조상님께 고맙다 한마디 해라.'],
+  };
   function personalDaily(saju, date) {
     const today = S.dayPillarOf(date.y, date.m, date.d);
     const god = S.tenGod(saju.dayMaster, today.stem);
@@ -69,7 +78,7 @@
     return {
       today, god, rel, score, stars: stars(score), keyword: g.key,
       all: pick(g.all, seed) + (mod.text ? ' ' + mod.text : ''),
-      money: g.money, love: g.love, tip: g.tip,
+      money: `${g.money} ${pick(EXTRA.money, seed >> 4)}`, love: `${g.love} ${pick(EXTRA.love, seed >> 7)}`, tip: `${g.tip} ${pick(EXTRA.tip, seed >> 10)}`,
       luckyColor: luck.color, luckyColorHex: luck.colorHex, luckySea: luck.sea, luckyDir: luck.dir, luckyNumber: (seed % 9) + 1,
     };
   }
