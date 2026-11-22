@@ -124,6 +124,13 @@
   .btns { display:flex; gap:10px; margin-top:16px; }
   .btns button { flex:1; padding:14px; font-size:15px; font-weight:700; border-radius:4px; border:1px solid #3a3330; background:#121014; color:var(--ink); cursor:pointer; font-family:var(--serif); }
   .warn { background:#241a10; color:#d9b071; border:1px solid #4a3a26; border-radius:3px; padding:8px 10px; font-size:13px; margin-top:10px; }
+  .ask .q { font-size:18px; line-height:1.7; margin:10px 0 12px; font-family:var(--brush); color:var(--main); }
+  .ask .ans { display:flex; gap:8px; }
+  .ask .ans button { flex:1; padding:12px 6px; font-size:15px; border-radius:4px; border:1px solid #4a2a2c; background:#1a0f10; color:var(--ink); font-family:var(--serif); cursor:pointer; }
+  .ask .re { margin:10px 0 0; padding:10px 12px; border-left:3px solid #6e1418; background:#150c0d; line-height:1.7; }
+  .ask .done { opacity:.55; font-size:13px; margin:6px 0; }
+  .rx a.go2 { display:block; margin:14px 0 6px; padding:14px; border-radius:4px; background:#6e1418; color:#f1e6cf; font-weight:700; text-decoration:none; font-size:17px; }
+  .rx a.sub { color:var(--sub); font-size:13px; }
   footer { text-align:center; font-size:12px; color:#6f6858; margin-top:28px; }
 </style>
 </head>
@@ -207,6 +214,7 @@
     </div>
 
     <div class="card"><h3>🕯️ 조상님 왈, 니는 이런 놈이다</h3><p class="para bub" id="aPerson"></p></div>
+    <div class="card ask" id="askCard"><h3>🕯️ 조상님이 니한테 묻는다</h3><p class="para bub" id="askScene"></p><div id="askDone"></div><div id="askNow"></div></div>
     <div class="card"><h3>💼 조상님이 본 사업운·재물운</h3><ul class="ul" id="aBiz"></ul></div>
     <div class="card"><h3>💘 조상님이 본 연애운</h3><ul class="ul" id="aLove"></ul></div>
     <div class="card"><h3>💍 조상님이 본 결혼운</h3><ul class="ul" id="aMarry"></ul></div>
@@ -235,11 +243,14 @@
       </div>
     </div>
 
-    <div class="card cta">
-      <p>조상님 왈, "오늘 니한테 필요한 바다 기운은</p>
-      <p class="big" id="rCta"></p>
-      <p>묵어 봐라" 🐟</p>
-      <p>네이버에서 <b>푸드비트</b>를 검색하세요 🐟</p>
+    <div class="card cta rx">
+      <p>📜 조상님 처방전</p>
+      <p class="big" id="rxFood"></p>
+      <p id="rxWhy"></p>
+      <p id="rxHow" style="color:var(--sub)"></p>
+      <a class="go2" id="rxNaver" target="_blank" rel="noopener">🕯️ 처방 받으러 가기</a>
+      <a class="sub" id="rxCoupang" target="_blank" rel="noopener">쿠팡에서 보기</a>
+      <p style="margin-top:12px">오늘 행운의 바다음식은 <b id="rCta"></b> · 네이버에서 <b>푸드비트</b>를 검색하세요 🐟</p>
     </div>
 
     <div class="btns">
@@ -259,6 +270,7 @@
 <script src="lunar.js"></script>
 <script src="fortune.js"></script>
 <script src="analysis.js"></script>
+<script src="medium.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const EL_CLASS = (i) => 'el' + i;
@@ -400,6 +412,39 @@ $('go').addEventListener('click', () => {
   $('rSea').textContent = f.luckySea;
   $('rCta').textContent = `「${f.luckySea}」`;
 
+  // 되묻는 조상님
+  const who = dm.ancestor.includes('할매') ? '할매' : '할배';
+  const voice = (t) => t.replace(/할배|할매/g, who);
+  const qs = Medium.questions(an), answers = [];
+  $('askScene').textContent = voice(Medium.scene(an, gender));
+  $('askDone').innerHTML = '';
+  const askNext = () => {
+    const i = answers.length;
+    if (i >= qs.length) {
+      $('askNow').innerHTML = qs.length ? `<p class="re">${voice(Medium.closing(an, answers, qs).text)}</p>` : '';
+      return;
+    }
+    const q = qs[i];
+    $('askNow').innerHTML = `<p class="q">${voice(q.q)}</p><div class="ans">
+      <button type="button" data-a="yes">😳 맞다</button><button type="button" data-a="maybe">🤔 긴가민가</button><button type="button" data-a="no">🙅 아이다</button></div>`;
+  };
+  $('askNow').onclick = (e) => {
+    const a = e.target.closest('button')?.dataset.a; if (!a) return;
+    const q = qs[answers.length]; answers.push(a);
+    const lab = { yes: '😳 맞다', maybe: '🤔 긴가민가', no: '🙅 아이다' }[a];
+    $('askDone').insertAdjacentHTML('beforeend', `<p class="done">${q.year}년 → ${lab}</p><p class="re">${voice(q[a])}</p>`);
+    askNext();
+  };
+  askNext();
+
+  // 조상님 처방
+  const rx = Medium.prescription(an);
+  $('rxFood').textContent = `${rx.emoji} ${rx.food}`;
+  $('rxWhy').textContent = voice(rx.why);
+  $('rxHow').textContent = `"${rx.how}"`;
+  $('rxNaver').href = rx.naver;
+  $('rxCoupang').href = rx.coupang;
+
   // 조상님 부르는 연출(약 2초)
   const sm = $('summon'), steps = ['…향을 피운다', '바닷바람에 촛불이 꺾인다', '누가… 니 이름을 부른다', `${dm.ancestor}가 오셨다`];
   sm.style.display = 'flex';
@@ -416,7 +461,7 @@ $('go').addEventListener('click', () => {
 $('again').addEventListener('click', () => { stopStory(); $('result').style.display = 'none'; $('form').style.display = 'block'; });
 
 // ── 탭하며 넘기는 이야기 화면 ─────────────────────
-const TEASE = ['니 사주 여덟 글자, 펼쳐 보자', '다섯 기운을 저울에 올려 보자', '니가 어떤 놈인지 말해 주꾸마', '돈복… 궁금하제?', '연애 얘기 해 보까', '결혼은 우째 되노', '자식 복도 한번 보자', '인생 물길을 펼친다', '올해·내년을 짚어 주꾸마', '오늘 하루는 우떻노', '조상님 마지막 한마디'];
+const TEASE = ['니 사주 여덟 글자, 펼쳐 보자', '다섯 기운을 저울에 올려 보자', '니가 어떤 놈인지 말해 주꾸마', '조상님이 니한테 물어볼 게 있다', '돈복… 궁금하제?', '연애 얘기 해 보까', '결혼은 우째 되노', '자식 복도 한번 보자', '인생 물길을 펼친다', '올해·내년을 짚어 주꾸마', '오늘 하루는 우떻노', '조상님 처방전 받아 가라'];
 let slides = [], cur = 0;
 function buildSlides() {
   const kids = [...$('result').children].filter((el) => el.classList.contains('card') || el.classList.contains('btns'));

@@ -306,7 +306,7 @@
     const from = Math.max(0, Math.min(ci - 2, daeunList.length - 5));
     const daeunShow = daeunList.slice(from, from + 5);
 
-    return { pos, cnt, strength: st, fav, goodEls, missingEls, dohwa, yeokma, gunGeop, personality, biz, love, marry, child, daeun: du, daeunList, daeunShow, years, pastYears, spouseGroup, childGroup };
+    return { pos, cnt, strength: st, fav, goodEls, missingEls, dohwa, yeokma, gunGeop, personality, biz, love, marry, child, daeun: du, daeunList, daeunShow, years, pastYears, spouseGroup, childGroup, yearInfo, birthY, now };
   }
 
   const api = { analyze, GROUP_KO };
