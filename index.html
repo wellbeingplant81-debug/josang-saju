@@ -131,6 +131,7 @@
   .ask .done { opacity:.55; font-size:13px; margin:6px 0; }
   .rx a.go2 { display:block; margin:14px 0 6px; padding:14px; border-radius:4px; background:#6e1418; color:#f1e6cf; font-weight:700; text-decoration:none; font-size:17px; }
   .rx a.sub { color:var(--sub); font-size:13px; }
+  #sndBtn { position:fixed; top:10px; right:10px; z-index:60; width:42px; height:42px; border-radius:50%; border:1px solid #4a2a2c; background:rgba(20,10,12,.85); color:#f1e6cf; font-size:19px; cursor:pointer; }
   footer { text-align:center; font-size:12px; color:#6f6858; margin-top:28px; }
 </style>
 </head>
@@ -186,6 +187,7 @@
       <label class="check"><input type="checkbox" id="noCorr"> 태어난 곳 시간 보정 안 함</label>
     </details>
     <button class="go" id="go">🕯️ 조상님 부르기</button>
+    <p class="note">🔊 소리를 켜고 들어라. 조상님 목소리가 난다.</p>
     <p class="note">생일은 어디에도 남지 않는다. 니 손전화 안에서만 조용히 풀어 본다.</p>
   </div>
 
@@ -260,6 +262,7 @@
     <canvas id="cv" width="1080" height="1920" style="display:none"></canvas>
   </div>
 
+  <button id="sndBtn" type="button" aria-label="소리 켜기/끄기">🔊</button>
   <div id="prog"></div>
   <div id="nav"><button id="navPrev" type="button">◀</button><button id="navNext" type="button">다음 ▶</button><span id="navCount"></span></div>
   <div id="summon"><div class="c">🕯️🕯️</div><p id="summonTx">향 피우는 중…</p></div>
@@ -334,6 +337,7 @@ $('gender').addEventListener('click', (e) => {
 });
 
 $('go').addEventListener('click', () => {
+  Snd.unlock();
   const sb = birthSolar();
   if (!sb) { alert('없는 날짜예요. 음력 날짜를 다시 확인해 주세요'); return; }
   const { year: y, month: m, day: d } = sb;
@@ -414,6 +418,8 @@ $('go').addEventListener('click', () => {
 
   // 되묻는 조상님
   const who = dm.ancestor.includes('할매') ? '할매' : '할배';
+  Snd.setWho(who === '할매' ? 'm' : 'h');
+  Snd.start();
   const voice = (t) => t.replace(/할배|할매/g, who);
   const qs = Medium.questions(an), answers = [];
   $('askScene').textContent = voice(Medium.scene(an, gender));
@@ -431,6 +437,7 @@ $('go').addEventListener('click', () => {
   $('askNow').onclick = (e) => {
     const a = e.target.closest('button')?.dataset.a; if (!a) return;
     const q = qs[answers.length]; answers.push(a);
+    Snd.react(a);
     const lab = { yes: '😳 맞다', maybe: '🤔 긴가민가', no: '🙅 아이다' }[a];
     $('askDone').insertAdjacentHTML('beforeend', `<p class="done">${q.year}년 → ${lab}</p><p class="re">${voice(q[a])}</p>`);
     askNext();
@@ -460,6 +467,46 @@ $('go').addEventListener('click', () => {
 
 $('again').addEventListener('click', () => { stopStory(); $('result').style.display = 'none'; $('form').style.display = 'block'; });
 
+// ── 조상님 목소리·효과음 (Web Audio: 첫 탭에서 열고, 그 뒤엔 언제든 재생) ──
+const Snd = (() => {
+  let ctx = null, on = true, amb = null, voice = null, who = 'h';
+  const bufs = {};
+  const load = (n) => bufs[n] || (bufs[n] = fetch(`audio/${n}.mp3`).then((r) => r.arrayBuffer()).then((a) => ctx.decodeAudioData(a)).catch(() => null));
+  const play = async (n, vol = 1, loop = false) => {
+    if (!ctx || !on) return null;
+    const b = await load(n); if (!b || !on) return null;
+    const src = ctx.createBufferSource(), g = ctx.createGain();
+    src.buffer = b; src.loop = loop; g.gain.value = vol;
+    src.connect(g).connect(ctx.destination); src.start();
+    return src;
+  };
+  const stopVoice = () => { try { voice && voice.stop(); } catch (e) {} voice = null; };
+  return {
+    unlock() {
+      if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return; ctx = new C(); }
+      if (ctx.state === 'suspended') ctx.resume();
+    },
+    setWho(w) { who = w; for (let i = 0; i < 3; i++) load(`${who}${String(i).padStart(2, '0')}`); },
+    async start() { if (!ctx || !on) return; play('sfx_candle', 0.8); if (!amb) amb = await play('amb', 0.55, true); },
+    async slide(i) {
+      if (!ctx || !on) return;
+      stopVoice(); play('sfx_bell', 0.35);
+      const n = `${who}${String(i).padStart(2, '0')}`;
+      load(`${who}${String(i + 1).padStart(2, '0')}`);
+      await new Promise((r) => setTimeout(r, 450));
+      voice = await play(n, 1);
+    },
+    async react(a) { if (!ctx || !on) return; stopVoice(); voice = await play(`${who}${a}`, 1); },
+    toggle() {
+      on = !on;
+      if (!on) { stopVoice(); try { amb && amb.stop(); } catch (e) {} amb = null; }
+      else if (ctx) { this.unlock(); play('amb', 0.55, true).then((a) => { amb = a; }); }
+      return on;
+    },
+  };
+})();
+$('sndBtn').addEventListener('click', () => { Snd.unlock(); $('sndBtn').textContent = Snd.toggle() ? '🔊' : '🔇'; });
+
 // ── 탭하며 넘기는 이야기 화면 ─────────────────────
 const TEASE = ['니 사주 여덟 글자, 펼쳐 보자', '다섯 기운을 저울에 올려 보자', '니가 어떤 놈인지 말해 주꾸마', '조상님이 니한테 물어볼 게 있다', '돈복… 궁금하제?', '연애 얘기 해 보까', '결혼은 우째 되노', '자식 복도 한번 보자', '인생 물길을 펼친다', '올해·내년을 짚어 주꾸마', '오늘 하루는 우떻노', '조상님 처방전 받아 가라'];
 let slides = [], cur = 0;
@@ -483,6 +530,7 @@ function show(i) {
   const last = cur === slides.length - 1;
   $('navNext').innerHTML = last ? '🕯️ 처음부터 다시 듣기' : `${TEASE[cur] || '다음'} ▶`;
   $('navCount').textContent = `${cur + 1} / ${slides.length}`;
+  Snd.slide(cur);
   window.scrollTo(0, 0);
 }
 function startStory() {
