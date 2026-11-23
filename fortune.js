@@ -52,7 +52,7 @@
   };
 
   function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
-  const pick = (arr, seed) => arr[seed % arr.length];
+  const pick = (arr, seed) => arr[(seed >>> 0) % arr.length]; // 음수가 되지 않게
   const clamp = (n) => Math.max(35, Math.min(99, Math.round(n)));
   const stars = (score) => { const n = Math.max(1, Math.round(score / 20)); return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); };
   function weakestElement(count) { let min = Infinity, idx = 0; count.forEach((c, i) => { if (c < min) { min = c; idx = i; } }); return idx; }

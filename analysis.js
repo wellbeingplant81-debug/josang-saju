@@ -13,7 +13,7 @@
   const ELEMENT_WORK = ['교육·출판·식물·패션', '방송·광고·IT·조명', '부동산·농업·중개·숙박', '금융·기계·법·의료기기', '바다·유통·무역·물류·음료'];
   const groupElement = (dmEl, g) => mod(dmEl + { 비겁: 0, 식상: 1, 재성: 2, 관성: 3, 인성: 4 }[g], 5);
   function hash(str) { let h = 2166136261; for (const c of str) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
-  const pick = (arr, seed) => arr[seed % arr.length];
+  const pick = (arr, seed) => arr[(seed >>> 0) % arr.length]; // 음수가 되지 않게
 
   // ── 조상님 말씀 글 모음 ──────────────────────────
   const PERSON = {

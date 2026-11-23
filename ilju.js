@@ -110,6 +110,28 @@
     };
   }
 
-  const api = { ilju, BIZ_OPEN, CHILD_ANIMAL };
+  // 오늘 날 기둥(일진)을 띠별 카드에 쓸 때: 「경오일 · 흰 말의 날」
+  const STEM_DAY = ['곧게 뻗는 나무 기운', '덩굴처럼 감기는 풀 기운', '해가 쨍한 불 기운', '촛불 같은 은은한 불 기운', '큰 산 같은 흙 기운',
+    '논밭 같은 촉촉한 흙 기운', '도끼 같은 쇠 기운', '바늘 같은 날 선 쇠 기운', '큰 바다 같은 물 기운', '이슬비 같은 물 기운'];
+  const BRANCH_DAY = ['밤에 움직이는 놈이 득 보는 날', '꾸준히 하는 놈이 이기는 날', '먼저 치고 나가는 놈이 웃는 날', '눈치와 감으로 먹고 사는 날',
+    '큰 그림 그리기 좋은 날', '조용히 속셈하는 놈이 이기는 날', '발 바쁘게 뛰어야 복 붙는 날', '정 나누면 복 되는 날',
+    '꾀 많은 놈이 웃는 날', '깔끔하게 마무리하는 날', '의리 지키면 돌아오는 날', '먹을 복 터지는 날'];
+  const wa = (w) => { const c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c % 28 ? '과' : '와'; };
+  const REL_TAG = { 육합: '과 짝꿍', 삼합: '과 한편', 같음: '같은 띠', 충: '과 맞부딪힘', 형: '과 신경전', 자형: '제 발 저림', 원진: '과 서먹', 보통: '' };
+  function dayName(p) {
+    const nick = `${COLOR[p.stem]} ${ANIMAL[p.branch]}`;
+    return { name: `${S.STEMS_KO[p.stem]}${S.BRANCHES_KO[p.branch]}일`, nick, mood: `${STEM_DAY[p.stem]}에 ${BRANCH_DAY[p.branch]}이다.` };
+  }
+  // 오늘 일진과 띠의 사이를 짧은 꼬리표로 (예: 「흰 말과 짝꿍」)
+  function relTag(p, rel) {
+    const t = REL_TAG[rel] || '';
+    if (!t) return '';
+    if (rel === '같음') return `${ANIMAL[p.branch]}의 날, 내 날이다`;
+    if (rel === '자형') return t;
+    const nick = `${COLOR[p.stem]} ${ANIMAL[p.branch]}`;
+    return nick + t.replace(/^과/, wa(nick));
+  }
+
+  const api = { ilju, dayName, relTag, BIZ_OPEN, CHILD_ANIMAL };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Ilju = api;
 })(typeof self !== 'undefined' ? self : this);
